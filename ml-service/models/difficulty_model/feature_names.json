@@ -1,0 +1,15 @@
+{
+  "features": [
+    "skip_rate",
+    "avg_time_seconds",
+    "self_rated_difficulty",
+    "attempt_count",
+    "topic_difficulty_avg",
+    "round_type_enc",
+    "company_tier"
+  ],
+  "n_classes": 5,
+  "label_offset": 1,
+  "cv_accuracy": 0.8549999999999999,
+  "cv_mae": 0.145
+}

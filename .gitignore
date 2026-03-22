@@ -1,0 +1,45 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Build output
+dist/
+build/
+coverage/
+
+# Environment files (NEVER commit these)
+.env
+.env.local
+.env.production
+.env.development
+
+# ChromaDB vectors (auto-generated)
+ml-service/chroma_data/
+
+# ML model files (large - trained locally)
+ml-service/models/difficulty_model/*.joblib
+ml-service/models/round_type_classifier/
+ml-service/models/topic_classifier/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+logs/
+
+# Cookies / test files
+cookies.txt

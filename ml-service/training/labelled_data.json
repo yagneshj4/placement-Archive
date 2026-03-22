@@ -1,0 +1,242 @@
+[
+  {
+    "text": "Amazon SDE-1 technical interview had 3 rounds. First round focused on LRU Cache implementation using HashMap and DoublyLinkedList with O(1) get and put. Second round was binary tree zigzag traversal. Third was system design — design a URL shortener.",
+    "roundType": "technical",
+    "topics": ["DSA", "System Design", "LRU Cache", "Binary Trees"],
+    "difficulty": 4
+  },
+  {
+    "text": "Amazon HR round was 45 minutes. All questions were based on Leadership Principles. Tell me about a time you failed. Why Amazon. Where do you see yourself in 5 years. Prepare STAR stories for each principle.",
+    "roundType": "hr",
+    "topics": ["HR", "Behavioral", "Leadership Principles"],
+    "difficulty": 3
+  },
+  {
+    "text": "JP Morgan coding test on HackerRank — 2 hours, 3 problems. First was maximum subarray sum using Kadane algorithm. Second was bank transaction system with timestamps. Third was hard graph problem.",
+    "roundType": "coding",
+    "topics": ["DSA", "Arrays", "Graphs", "Algorithms"],
+    "difficulty": 3
+  },
+  {
+    "text": "JP Morgan technical interview focused on Java concurrency. Questions on HashMap vs ConcurrentHashMap, thread safety, implement thread-safe LRU Cache using ReentrantReadWriteLock.",
+    "roundType": "technical",
+    "topics": ["Java", "Multithreading", "Concurrency", "LRU Cache"],
+    "difficulty": 4
+  },
+  {
+    "text": "TCS NQT aptitude test has three sections — verbal 20 questions, reasoning 20 questions, numerical 20 questions. Negative marking 0.33 per wrong answer. Focus on speed and accuracy.",
+    "roundType": "aptitude",
+    "topics": ["Aptitude", "Verbal", "Reasoning", "Quantitative"],
+    "difficulty": 2
+  },
+  {
+    "text": "Infosys InfyTQ coding round on HackerEarth. Two coding problems — longest palindromic substring using DP and minimum spanning tree using Kruskal algorithm. Plus 10 MCQs on data structures.",
+    "roundType": "coding",
+    "topics": ["DSA", "Dynamic Programming", "Graphs", "Strings"],
+    "difficulty": 3
+  },
+  {
+    "text": "Microsoft system design round. Design a collaborative document editor like Google Docs. Discuss operational transformation vs CRDT for conflict resolution. Scale to 10 million concurrent users.",
+    "roundType": "system_design",
+    "topics": ["System Design", "Distributed Systems", "Real-time", "Scalability"],
+    "difficulty": 5
+  },
+  {
+    "text": "Wipro HR interview was very straightforward — 30 minutes video call. Tell me about yourself, why Wipro, are you willing to relocate, strengths and weaknesses, where do you see yourself in 5 years.",
+    "roundType": "hr",
+    "topics": ["HR", "Behavioral"],
+    "difficulty": 1
+  },
+  {
+    "text": "Google technical interview — find all bridges in undirected graph using Tarjan algorithm. Also median of data stream using two heaps approach. Speed and code cleanliness both evaluated.",
+    "roundType": "technical",
+    "topics": ["DSA", "Graphs", "Heaps", "Algorithms"],
+    "difficulty": 5
+  },
+  {
+    "text": "Flipkart technical round — implement hit counter returning count of hits in past 5 minutes using sliding window deque. Design Flipkart product search with Elasticsearch and Redis cache.",
+    "roundType": "technical",
+    "topics": ["DSA", "System Design", "Sliding Window", "Elasticsearch"],
+    "difficulty": 4
+  },
+  {
+    "text": "Cognizant technical interview focused on OOPs concepts — polymorphism abstraction encapsulation inheritance with real examples. Write program to reverse a linked list iteratively and recursively.",
+    "roundType": "technical",
+    "topics": ["DSA", "OOP", "Linked Lists", "Java"],
+    "difficulty": 2
+  },
+  {
+    "text": "Accenture aptitude and coding test — quantitative aptitude basic maths, verbal reasoning, coding section had simple array manipulation and string problems. Easy difficulty overall.",
+    "roundType": "aptitude",
+    "topics": ["Aptitude", "Arrays", "Strings"],
+    "difficulty": 1
+  },
+  {
+    "text": "Oracle technical interview — SQL queries with joins subqueries window functions. Also Java streams and lambda expressions. Database normalization up to 3NF and ACID properties.",
+    "roundType": "technical",
+    "topics": ["DBMS", "SQL", "Java", "Database"],
+    "difficulty": 3
+  },
+  {
+    "text": "Deloitte managerial round — discuss your final year project in detail. How would you handle a situation where your team member is not meeting deadlines. Leadership and conflict resolution questions.",
+    "roundType": "managerial",
+    "topics": ["Managerial", "Leadership", "Project Management"],
+    "difficulty": 2
+  },
+  {
+    "text": "HCL coding round — two easy problems on arrays and strings. First was remove duplicates from sorted array. Second was check if two strings are anagrams. 90 minutes for both problems.",
+    "roundType": "coding",
+    "topics": ["DSA", "Arrays", "Strings"],
+    "difficulty": 1
+  },
+  {
+    "text": "Uber system design interview — design ride sharing system. Cover geolocation, surge pricing algorithm, matching driver to rider, real-time tracking with websockets, database sharding.",
+    "roundType": "system_design",
+    "topics": ["System Design", "Geolocation", "Real-time", "Database", "Scalability"],
+    "difficulty": 5
+  },
+  {
+    "text": "Zoho technical interview — pure coding questions on recursion, backtracking, and dynamic programming. No system design. Questions were medium to hard level. Focus on optimal solutions.",
+    "roundType": "technical",
+    "topics": ["DSA", "Recursion", "Backtracking", "Dynamic Programming"],
+    "difficulty": 4
+  },
+  {
+    "text": "Capgemini aptitude test — pseudocode questions where you read code and predict output, game-based assessments, behavioural questions, and essay writing. Different from standard aptitude.",
+    "roundType": "aptitude",
+    "topics": ["Aptitude", "Pseudocode", "Behavioral"],
+    "difficulty": 2
+  },
+  {
+    "text": "Razorpay backend technical interview — design and implement rate limiter from scratch. Also questions on Redis internals, consistent hashing, and database transactions with isolation levels.",
+    "roundType": "technical",
+    "topics": ["System Design", "Redis", "Database", "Distributed Systems"],
+    "difficulty": 4
+  },
+  {
+    "text": "Swiggy system design — design food delivery system like Swiggy. Cover order management, restaurant onboarding, real-time driver tracking, surge pricing, notification service.",
+    "roundType": "system_design",
+    "topics": ["System Design", "Real-time", "Scalability", "Geolocation"],
+    "difficulty": 4
+  },
+  {
+    "text": "Paytm coding round — implement a stack that supports push pop and getMin in O(1) time. Then LRU Cache with get and put in O(1). Both classical data structure problems.",
+    "roundType": "coding",
+    "topics": ["DSA", "Stack", "LRU Cache", "Data Structures"],
+    "difficulty": 3
+  },
+  {
+    "text": "IBM HR round — standard questions about career goals, team work experience, handling failure, why IBM, expected salary. Friendly interviewer. No technical questions in this round.",
+    "roundType": "hr",
+    "topics": ["HR", "Behavioral"],
+    "difficulty": 1
+  },
+  {
+    "text": "Samsung R&D coding test — C and C++ focused problems. Memory management, pointers, dynamic arrays. Also embedded systems basics like interrupts and real-time operating systems concepts.",
+    "roundType": "coding",
+    "topics": ["C/C++", "DSA", "Embedded Systems", "Memory Management"],
+    "difficulty": 4
+  },
+  {
+    "text": "Adobe technical interview — image processing algorithm questions, matrix rotation, convolution operations. Also design Photoshop undo redo feature using command pattern and observer pattern.",
+    "roundType": "technical",
+    "topics": ["DSA", "LLD", "Design Patterns", "Algorithms"],
+    "difficulty": 4
+  },
+  {
+    "text": "Groww backend coding interview — two LeetCode hard problems. First was merge k sorted linked lists using min heap. Second was serialize and deserialize binary tree. Very fast paced.",
+    "roundType": "coding",
+    "topics": ["DSA", "Linked Lists", "Heaps", "Binary Trees"],
+    "difficulty": 5
+  },
+  {
+    "text": "Juspay functional programming round — Haskell and Scala concepts, pure functions, monads, immutability. Also system design for payment gateway with idempotency and exactly once delivery.",
+    "roundType": "technical",
+    "topics": ["Functional Programming", "System Design", "Distributed Systems"],
+    "difficulty": 5
+  },
+  {
+    "text": "L&T Infotech group discussion round — topic was artificial intelligence in healthcare. 8 candidates discussed for 20 minutes. Evaluate by communication skills, content knowledge, leadership.",
+    "roundType": "aptitude",
+    "topics": ["Group Discussion", "Communication", "AI"],
+    "difficulty": 2
+  },
+  {
+    "text": "Mindtree technical and aptitude combined round. First section was 20 aptitude questions — pipes cisterns time distance. Second section was 2 coding problems on strings and arrays. Easy level.",
+    "roundType": "aptitude",
+    "topics": ["Aptitude", "Arrays", "Strings"],
+    "difficulty": 2
+  },
+  {
+    "text": "Goldman Sachs technical interview — quantitative finance questions combined with coding. Implement options pricing model, explain time value of money, also binary search tree operations.",
+    "roundType": "technical",
+    "topics": ["Algorithms", "Finance", "DSA", "Binary Trees"],
+    "difficulty": 4
+  },
+  {
+    "text": "Atlassian system design — design Jira project management system. User stories, sprints, kanban boards, notifications, integrations with GitHub. Scale to 100000 projects.",
+    "roundType": "system_design",
+    "topics": ["System Design", "Database", "Scalability", "Notifications"],
+    "difficulty": 4
+  },
+  {
+    "text": "PhonePe technical interview — implement consistent hashing with virtual nodes for distributed cache. Also questions on Kafka message queues, consumer groups, and exactly once semantics.",
+    "roundType": "technical",
+    "topics": ["Distributed Systems", "System Design", "Message Queue", "Cache"],
+    "difficulty": 5
+  },
+  {
+    "text": "Cerner healthcare IT technical interview — HL7 FHIR API standards, EHR system design, patient data security and HIPAA compliance, database design for medical records.",
+    "roundType": "technical",
+    "topics": ["System Design", "Database", "Healthcare IT", "API Design"],
+    "difficulty": 3
+  },
+  {
+    "text": "Infosys managerial discussion — why do you want to join Infosys, how do you handle team conflicts, describe a project where you showed leadership, your 5-year plan.",
+    "roundType": "managerial",
+    "topics": ["Managerial", "Leadership", "Behavioral"],
+    "difficulty": 2
+  },
+  {
+    "text": "Wipro elite coding assessment — 3 problems in 3 hours. Dynamic programming on matrix, graph BFS DFS problems, and a string manipulation problem. Medium difficulty overall.",
+    "roundType": "coding",
+    "topics": ["DSA", "Dynamic Programming", "Graphs", "Strings"],
+    "difficulty": 3
+  },
+  {
+    "text": "Postman technical interview — API design best practices, REST vs GraphQL tradeoffs, design a rate limiter for API gateway, implement circuit breaker pattern in distributed system.",
+    "roundType": "technical",
+    "topics": ["System Design", "API Design", "Distributed Systems"],
+    "difficulty": 4
+  },
+  {
+    "text": "Schlumberger data structures focused round — implement trie for autocomplete, segment tree for range queries, and disjoint set union for network connectivity problems.",
+    "roundType": "coding",
+    "topics": ["DSA", "Trie", "Segment Tree", "Advanced Data Structures"],
+    "difficulty": 5
+  },
+  {
+    "text": "Cisco network engineering technical — OSI model layers, TCP UDP differences, subnetting CIDR notation, BGP routing protocol, and software defined networking concepts.",
+    "roundType": "technical",
+    "topics": ["Networking", "OS", "System Design"],
+    "difficulty": 3
+  },
+  {
+    "text": "EPAM technical coding — clean code principles, SOLID design principles with examples, implement dependency injection from scratch, unit testing with mocks and stubs.",
+    "roundType": "technical",
+    "topics": ["LLD", "OOP", "Design Patterns", "Testing"],
+    "difficulty": 3
+  },
+  {
+    "text": "Freshworks product engineering round — design and code a simplified version of their CRM notification system. Real-time alerts, email triggers, in-app notifications with delivery guarantees.",
+    "roundType": "system_design",
+    "topics": ["System Design", "Real-time", "Notifications", "Message Queue"],
+    "difficulty": 4
+  },
+  {
+    "text": "Airtel digital technical interview — telecom domain knowledge, design billing system for prepaid postpaid customers, event driven architecture for usage tracking and alerts.",
+    "roundType": "technical",
+    "topics": ["System Design", "Event Driven", "Database", "Billing"],
+    "difficulty": 3
+  }
+]
