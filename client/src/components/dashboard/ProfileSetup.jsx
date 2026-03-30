@@ -49,58 +49,58 @@ export default function ProfileSetup({ onSave, isSaving, initialCompanies = [], 
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl">
-      <h2 className="text-base font-semibold text-gray-900 mb-1">Set your target companies</h2>
-      <p className="text-sm text-gray-500 mb-5">
-        Select the companies you are preparing for. The dashboard will prioritize topics that matter most for those interviews.
+    <div className="bg-white rounded-[1.5rem] border border-gray-200 p-8 max-w-2xl shadow-xl">
+      <h2 className="text-xl font-black text-gray-900 mb-2 tracking-tight">Set your target companies</h2>
+      <p className="text-sm font-medium text-gray-500 mb-6 leading-relaxed">
+        Select the companies you are preparing for. The ML dashboard will prioritize analyzing topics that matter most for these specific technical interviews.
       </p>
 
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-2.5 mb-6">
         {POPULAR_COMPANIES.map((company) => (
           <button
             key={company}
             onClick={() => toggleCompany(company)}
-            className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
+            className={`px-4 py-2 rounded-xl text-[13px] border font-bold transition-all shadow-sm hover:-translate-y-0.5 ${
               selected.has(company)
-                ? 'bg-violet-700 text-white border-violet-700'
-                : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                ? 'bg-gray-900 text-white border-gray-900 shadow-md'
+                : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900'
             }`}
           >
-            {selected.has(company) ? 'Selected: ' : ''}
+            {selected.has(company) ? '✓ ' : ''}
             {company}
           </button>
         ))}
       </div>
 
-      <div className="flex gap-2 mb-5">
+      <div className="flex gap-3 mb-8">
         <input
           value={customInput}
           onChange={(e) => setCustomInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') addCustom()
           }}
-          placeholder="Add another company"
-          className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+          placeholder="Add another company..."
+          className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition-colors shadow-sm"
         />
         <button
           onClick={addCustom}
-          className="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50"
+          className="px-6 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 shadow-sm hover:border-gray-300 hover:text-gray-900 hover:-translate-y-0.5 transition-all"
         >
           Add
         </button>
       </div>
 
-      <div className="mb-5">
-        <p className="text-sm font-medium text-gray-700 mb-2">Target role</p>
-        <div className="flex flex-wrap gap-2">
+      <div className="mb-8 p-6 bg-gray-50 rounded-[1.25rem] border border-gray-100">
+        <p className="text-[11px] font-black uppercase tracking-widest text-gray-500 mb-3">Target role</p>
+        <div className="flex flex-wrap gap-2.5">
           {ROLES.map((option) => (
             <button
               key={option}
               onClick={() => setRole(option)}
-              className={`px-3 py-1.5 rounded-full text-sm border transition-all ${
+              className={`px-4 py-2 rounded-xl text-[13px] font-bold border transition-all hover:-translate-y-0.5 ${
                 role === option
-                  ? 'bg-violet-700 text-white border-violet-700'
-                  : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                  ? 'bg-gray-900 text-white border-gray-900 shadow-md'
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:shadow-sm hover:text-gray-900'
               }`}
             >
               {option}
@@ -112,9 +112,9 @@ export default function ProfileSetup({ onSave, isSaving, initialCompanies = [], 
       <button
         onClick={handleSave}
         disabled={isSaving || selectedCount === 0}
-        className="px-6 py-2.5 bg-violet-700 text-white rounded-lg text-sm font-medium hover:bg-violet-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full sm:w-auto px-10 py-4 bg-gray-900 text-white rounded-xl text-sm font-black tracking-widest uppercase hover:bg-gray-800 shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
       >
-        {isSaving ? 'Saving...' : `Analyze gaps for ${selectedCount} compan${selectedCount === 1 ? 'y' : 'ies'}`}
+        {isSaving ? 'Saving parameters...' : `Analyze gaps for ${selectedCount} compan${selectedCount === 1 ? 'y' : 'ies'}`}
       </button>
     </div>
   )

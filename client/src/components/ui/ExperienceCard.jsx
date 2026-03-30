@@ -17,12 +17,12 @@ const ROUND_LABELS = {
 }
 
 const ROUND_COLORS = {
-  coding: 'bg-blue-100 text-blue-800',
-  technical: 'bg-purple-100 text-purple-800',
-  hr: 'bg-green-100 text-green-800',
-  system_design: 'bg-orange-100 text-orange-800',
-  managerial: 'bg-teal-100 text-teal-800',
-  aptitude: 'bg-gray-100 text-gray-700',
+  coding: 'bg-blue-50 text-blue-700 border border-blue-200',
+  technical: 'bg-indigo-50 text-indigo-700 border border-indigo-200',
+  hr: 'bg-green-50 text-green-700 border border-green-200',
+  system_design: 'bg-orange-50 text-orange-700 border border-orange-200',
+  managerial: 'bg-teal-50 text-teal-700 border border-teal-200',
+  aptitude: 'bg-gray-100 text-gray-700 border border-gray-300',
 }
 
 export default function ExperienceCard({ experience, onBookmarkToggle, similarityScore }) {
@@ -54,17 +54,17 @@ export default function ExperienceCard({ experience, onBookmarkToggle, similarit
 
   return (
     <div
-      className="bg-white rounded-xl border border-gray-200 p-5 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer group"
+      className="bg-white rounded-[1.25rem] border border-gray-200 p-6 hover:border-gray-300 hover:shadow-xl transition-all duration-300 cursor-pointer group"
       onClick={() => navigate(`/experiences/${experience._id}`)}
     >
       {/* Header row */}
-      <div className="flex items-start justify-between gap-3 mb-3">
+      <div className="flex items-start justify-between gap-3 mb-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-semibold text-gray-900 text-sm">{experience.company}</h3>
-            {experience.isVerified && <span className="text-xs text-blue-600 font-medium">✓ Verified</span>}
+            <h3 className="font-extrabold text-gray-900 tracking-tight text-lg">{experience.company}</h3>
+            {experience.isVerified && <span className="text-[10px] text-teal-700 font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-teal-50 border border-teal-200 shadow-sm">✓ Verified</span>}
           </div>
-          <p className="text-gray-500 text-xs mt-0.5">
+          <p className="text-gray-500 font-semibold text-xs mt-1">
             {experience.role} · {experience.year} · {ROUND_LABELS[experience.roundType] || experience.roundType}
           </p>
         </div>
@@ -72,8 +72,8 @@ export default function ExperienceCard({ experience, onBookmarkToggle, similarit
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Round type badge */}
           <span
-            className={`text-xs font-medium px-2 py-0.5 rounded ${
-              ROUND_COLORS[experience.roundType] || 'bg-gray-100 text-gray-700'
+            className={`text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded shadow-sm ${
+              ROUND_COLORS[experience.roundType] || 'bg-gray-50 text-gray-600 border border-gray-200'
             }`}
           >
             {ROUND_LABELS[experience.roundType]}
@@ -81,7 +81,7 @@ export default function ExperienceCard({ experience, onBookmarkToggle, similarit
 
           {/* Offer badge */}
           {experience.offerReceived === true && (
-            <span className="text-xs font-medium px-2 py-0.5 rounded bg-green-100 text-green-800">
+            <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-green-50 text-green-700 border border-green-200 shadow-sm">
               Got Offer
             </span>
           )}
@@ -92,15 +92,15 @@ export default function ExperienceCard({ experience, onBookmarkToggle, similarit
       </div>
 
       {/* Narrative preview */}
-      <p className="text-gray-600 text-sm line-clamp-3 leading-relaxed mb-3">{experience.narrative}</p>
+      <p className="text-gray-700 text-sm line-clamp-3 leading-relaxed mb-4">{experience.narrative}</p>
 
       {/* Tags */}
       {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-3">
+        <div className="flex flex-wrap gap-1.5 mb-4">
           {tags.slice(0, 5).map((tag, i) => (
             <TagChip key={tag} label={tag} index={i} />
           ))}
-          {tags.length > 5 && <span className="text-xs text-gray-400">+{tags.length - 5} more</span>}
+          {tags.length > 5 && <span className="text-xs text-gray-400 font-bold ml-1">+{tags.length - 5} more</span>}
         </div>
       )}
 
@@ -110,18 +110,18 @@ export default function ExperienceCard({ experience, onBookmarkToggle, similarit
       )}
 
       {/* Footer row */}
-      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-        <div className="flex items-center gap-3 text-xs text-gray-400">
+      <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-2">
+        <div className="flex items-center gap-3 text-xs text-gray-500 font-semibold">
           <span>{experience.views || 0} views</span>
           {experience.submittedBy?.name && <span>by {experience.submittedBy.name}</span>}
-          {isProcessing && <span className="text-amber-600 font-medium">⟳ AI processing...</span>}
+          {isProcessing && <span className="text-amber-600 font-bold">⟳ AI processing...</span>}
         </div>
 
         {/* Bookmark button */}
         <button
           onClick={handleBookmark}
-          className={`flex items-center gap-1 text-xs transition-colors ${
-            bookmarked ? 'text-blue-600' : 'text-gray-400 hover:text-blue-500'
+          className={`flex items-center gap-1.5 text-xs transition-colors p-1.5 rounded-md ${
+            bookmarked ? 'text-gray-900 bg-gray-100' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50'
           }`}
         >
           <svg
@@ -133,7 +133,7 @@ export default function ExperienceCard({ experience, onBookmarkToggle, similarit
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
           </svg>
-          {bookmarkCount > 0 && <span>{bookmarkCount}</span>}
+          {bookmarkCount > 0 && <span className="font-bold">{bookmarkCount}</span>}
         </button>
       </div>
     </div>

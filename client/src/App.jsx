@@ -28,15 +28,8 @@ function App() {
         {/* Auth */}
         <Route path="/auth" element={user ? <Navigate to="/home" replace /> : <Auth />} />
 
-        {/* Public landing — 3D hero for guests, redirect to experience feed if logged in */}
-        <Route
-          path="/"
-          element={
-            user
-              ? <Navigate to="/home" replace />
-              : <Landing />
-          }
-        />
+        {/* Public landing — 3D hero & feature showcase for everyone */}
+        <Route path="/" element={<Landing />} />
 
         {/* Public — no login needed */}
         <Route path="/experiences/:id" element={<PageWrapper><ExperienceDetail /></PageWrapper>} />

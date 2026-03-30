@@ -19,50 +19,46 @@ export default function FilterSidebar({
   clearFilters,
 }) {
   return (
-    <aside className="w-56 flex-shrink-0 hidden lg:block">
-      <div className="bg-white rounded-xl border border-gray-200 p-4 sticky top-20">
-
-        {/* Sidebar header */}
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-900">Filters</h3>
+    <aside className="w-64 flex-shrink-0 hidden lg:block">
+      <div className="bg-white rounded-[1.25rem] border border-gray-200 p-5 sticky top-24 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">Filters</h3>
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="text-xs text-purple-600 hover:text-purple-800 font-medium"
+              className="text-[11px] font-bold uppercase tracking-widest text-gray-500 hover:text-gray-900 transition-colors"
             >
-              Clear all
+              Clear
             </button>
           )}
         </div>
 
         {/* Round type section */}
-        <div className="mb-5">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Round type</p>
-          <div className="space-y-1">
-            {/* All rounds option */}
+        <div className="mb-6 border-b border-gray-100 pb-6">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Round type</p>
+          <div className="space-y-1.5">
             <button
               onClick={() => setRoundType('')}
-              className={`w-full text-left flex items-center justify-between px-2 py-1.5 rounded-md text-sm transition-colors ${
-                !roundType ? 'bg-purple-50 text-purple-700 font-medium' : 'text-gray-600 hover:bg-gray-50'
+              className={`w-full text-left flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                !roundType ? 'bg-gray-900 text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
               <span>All rounds</span>
             </button>
 
-            {/* Dynamic counts from aggregation */}
             {filterCounts?.roundTypes?.map(rt => (
               <button
                 key={rt.name}
                 onClick={() => setRoundType(roundType === rt.name ? '' : rt.name)}
-                className={`w-full text-left flex items-center justify-between px-2 py-1.5 rounded-md text-sm transition-colors ${
+                className={`w-full text-left flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
                   roundType === rt.name
-                    ? 'bg-purple-50 text-purple-700 font-medium'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-gray-900 text-white shadow-md'
+                    : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 <span>{ROUND_LABELS[rt.name] || rt.name}</span>
-                <span className={`text-xs rounded-full px-1.5 py-0.5 ${
-                  roundType === rt.name ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-500'
+                <span className={`text-[10px] font-black rounded-md px-1.5 py-0.5 ${
+                  roundType === rt.name ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-400'
                 }`}>
                   {rt.count}
                 </span>
@@ -72,23 +68,23 @@ export default function FilterSidebar({
         </div>
 
         {/* Year section */}
-        <div className="mb-5">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Year</p>
-          <div className="space-y-1">
+        <div className="mb-6 border-b border-gray-100 pb-6">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Year</p>
+          <div className="space-y-1.5 flex flex-wrap gap-2">
             <button
               onClick={() => setYear('')}
-              className={`w-full text-left px-2 py-1.5 rounded-md text-sm transition-colors ${
-                !year ? 'bg-purple-50 text-purple-700 font-medium' : 'text-gray-600 hover:bg-gray-50'
+              className={`text-center px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                !year ? 'bg-gray-900 text-white shadow-md' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
               }`}
             >
-              All years
+              All
             </button>
-            {YEAR_OPTIONS.map(y => (
+            {YEAR_OPTIONS.map((y, idx) => (
               <button
                 key={y}
                 onClick={() => setYear(year === y ? '' : y)}
-                className={`w-full text-left px-2 py-1.5 rounded-md text-sm transition-colors ${
-                  year === y ? 'bg-purple-50 text-purple-700 font-medium' : 'text-gray-600 hover:bg-gray-50'
+                className={`text-center px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  year === y ? 'bg-gray-900 text-white shadow-md' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 {y}
@@ -99,35 +95,35 @@ export default function FilterSidebar({
 
         {/* Company section */}
         <div>
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Company</p>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Company</p>
 
-          {/* Free text input for company */}
           <input
             value={company}
             onChange={e => setCompany(e.target.value)}
-            placeholder="Type company name..."
-            className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 mb-2"
+            placeholder="Search filters..."
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-xs font-bold text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 mb-3 bg-gray-50 focus:bg-white transition-all shadow-sm"
           />
 
-          {/* Top companies from aggregation */}
-          {filterCounts?.companies?.slice(0, 8).map(c => (
-            <button
-              key={c.name}
-              onClick={() => setCompany(company === c.name ? '' : c.name)}
-              className={`w-full text-left flex items-center justify-between px-2 py-1.5 rounded-md text-xs transition-colors ${
-                company === c.name
-                  ? 'bg-purple-50 text-purple-700 font-medium'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <span className="truncate">{c.name}</span>
-              <span className={`ml-1 text-xs rounded-full px-1.5 py-0.5 flex-shrink-0 ${
-                company === c.name ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-500'
-              }`}>
-                {c.count}
-              </span>
-            </button>
-          ))}
+          <div className="space-y-1.5">
+            {filterCounts?.companies?.slice(0, 8).map(c => (
+              <button
+                key={c.name}
+                onClick={() => setCompany(company === c.name ? '' : c.name)}
+                className={`w-full text-left flex items-center justify-between px-3 py-2 rounded-xl text-[13px] font-bold transition-all ${
+                  company === c.name
+                    ? 'bg-gray-900 text-white shadow-md'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <span className="truncate">{c.name}</span>
+                <span className={`ml-1 text-[10px] font-black rounded-md px-1.5 py-0.5 flex-shrink-0 ${
+                  company === c.name ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-400'
+                }`}>
+                  {c.count}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
       </div>

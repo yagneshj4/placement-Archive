@@ -37,19 +37,32 @@ export default function Auth() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-			<div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 w-full max-w-md">
+		<div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 relative overflow-hidden font-sans">
+			{/* Ambient Background Glows */}
+			<div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-100 rounded-full blur-[120px] pointer-events-none opacity-60" />
+			<div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-teal-50 rounded-full blur-[120px] pointer-events-none opacity-60" />
+            
+			{/* Grid pattern overlay */}
+            <div 
+                className="absolute inset-0 pointer-events-none opacity-[0.03]"
+                style={{ backgroundImage: `linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)`, backgroundSize: '40px 40px' }}
+            />
 
+			<div className="w-full max-w-md bg-white/80 backdrop-blur-2xl border border-gray-200 rounded-[2rem] p-8 sm:p-10 shadow-2xl relative z-10 transition-all">
+				
 				{/* Header */}
 				<div className="text-center mb-8">
-					<h1 className="text-2xl font-bold text-gray-900">The Placement Archive</h1>
-					<p className="text-gray-500 mt-1 text-sm">
-						{mode === 'login' ? 'Sign in to your account' : 'Create your account'}
+					<div className="w-12 h-12 mx-auto bg-gray-900 rounded-xl flex items-center justify-center shadow-lg mb-6">
+						<span className="text-white text-xl">◆</span>
+					</div>
+					<h1 className="text-3xl font-black text-gray-900 tracking-tight leading-none mb-2">The Archive</h1>
+					<p className="text-gray-500 text-sm">
+						{mode === 'login' ? 'Welcome back. Sign in to continue.' : 'Join the most prepared candidates.'}
 					</p>
 				</div>
 
 				{/* Mode toggle */}
-				<div className="flex rounded-lg border border-gray-200 p-1 mb-6">
+				<div className="flex bg-gray-100 p-1.5 rounded-xl mb-8 border border-gray-200">
 					{['login', 'register'].map((m) => (
 						<button
 							key={m}
@@ -57,8 +70,10 @@ export default function Auth() {
 								setMode(m)
 								setError('')
 							}}
-							className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-								mode === m ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-gray-700'
+							className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${
+								mode === m 
+									? 'bg-white text-gray-900 shadow-sm border border-gray-200' 
+									: 'text-gray-500 hover:text-gray-700 transparent'
 							}`}
 						>
 							{m === 'login' ? 'Sign In' : 'Create Account'}
@@ -68,7 +83,7 @@ export default function Auth() {
 
 				{/* Error */}
 				{error && (
-					<div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
+					<div className="bg-red-50 border border-red-200 text-red-600 font-medium text-sm rounded-xl px-4 py-3 mb-6 text-center">
 						{error}
 					</div>
 				)}
@@ -77,20 +92,20 @@ export default function Auth() {
 				<form onSubmit={handleSubmit} className="space-y-4">
 					{mode === 'register' && (
 						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+							<label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Full Name</label>
 							<input
 								name="name"
 								value={form.name}
 								onChange={handleChange}
 								required
 								placeholder="Yagnesh Kumar"
-								className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+								className="w-full bg-white border border-gray-300 text-gray-900 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 placeholder-gray-400 transition-colors shadow-sm"
 							/>
 						</div>
 					)}
 
 					<div>
-						<label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+						<label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Email Address</label>
 						<input
 							name="email"
 							type="email"
@@ -98,12 +113,12 @@ export default function Auth() {
 							onChange={handleChange}
 							required
 							placeholder="you@vrsec.ac.in"
-							className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+							className="w-full bg-white border border-gray-300 text-gray-900 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 placeholder-gray-400 transition-colors shadow-sm"
 						/>
 					</div>
 
 					<div>
-						<label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+						<label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Password</label>
 						<input
 							name="password"
 							type="password"
@@ -111,19 +126,19 @@ export default function Auth() {
 							onChange={handleChange}
 							required
 							placeholder="••••••••"
-							className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+							className="w-full bg-white border border-gray-300 text-gray-900 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 placeholder-gray-400 transition-colors shadow-sm"
 						/>
 					</div>
 
 					{mode === 'register' && (
 						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">College</label>
+							<label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">College</label>
 							<input
 								name="college"
 								value={form.college}
 								onChange={handleChange}
 								placeholder="VR Siddhartha Engineering College"
-								className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+								className="w-full bg-white border border-gray-300 text-gray-900 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 placeholder-gray-400 transition-colors shadow-sm"
 							/>
 						</div>
 					)}
@@ -131,17 +146,19 @@ export default function Auth() {
 					<button
 						type="submit"
 						disabled={loading}
-						className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mt-2"
+						className="w-full bg-gray-900 text-white py-4 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-gray-800 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-6"
 					>
-						{loading ? 'Please wait...' : (mode === 'login' ? 'Sign In' : 'Create Account')}
+						{loading ? 'Authenticating...' : (mode === 'login' ? 'Enter Archive' : 'Establish Access')}
 					</button>
 				</form>
 
 				{/* Quick test credentials */}
-				<div className="mt-6 p-3 bg-gray-50 rounded-lg text-xs text-gray-500">
-					<p className="font-medium text-gray-700 mb-1">Test credentials (from seed data):</p>
-					<p>Student: priya@vrsec.ac.in / Student@1234</p>
-					<p>Admin: admin@vrsec.ac.in / Admin@1234</p>
+				<div className="mt-8 p-4 bg-gray-50 border border-gray-200 rounded-xl text-xs flex flex-col items-center text-center shadow-inner">
+					<p className="font-bold text-gray-400 mb-2 uppercase tracking-widest text-[10px]">Test Credentials</p>
+					<div className="space-y-1 font-mono">
+						<p><span className="text-gray-500 font-semibold">Student:</span> <span className="text-gray-700">priya@vrsec.ac.in</span> <span className="text-gray-400 mx-1">/</span> <span className="text-gray-700">Student@1234</span></p>
+						<p><span className="text-gray-500 font-semibold">Admin:</span> <span className="text-gray-700">admin@vrsec.ac.in</span> <span className="text-gray-400 mx-1">/</span> <span className="text-gray-700">Admin@1234</span></p>
+					</div>
 				</div>
 			</div>
 		</div>
