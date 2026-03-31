@@ -5,6 +5,7 @@ import {
 	getCurrentUser,
 	setRefreshTokenCookie,
 	clearRefreshTokenCookie,
+	loginWithGoogle
 } from '../services/auth.service.js'
 import { sendSuccess, sendError } from '../utils/apiResponse.js'
 
@@ -34,6 +35,20 @@ export const login = async (req, res, next) => {
 		setRefreshTokenCookie(res, refreshToken)
 
 		sendSuccess(res, { user, accessToken }, 'Login successful')
+	} catch (err) {
+		next(err)
+	}
+}
+
+// POST /api/auth/google
+export const googleAuth = async (req, res, next) => {
+	try {
+		const { idToken } = req.body
+		const { user, accessToken, refreshToken } = await loginWithGoogle({ idToken })
+
+		setRefreshTokenCookie(res, refreshToken)
+
+		sendSuccess(res, { user, accessToken }, 'Google login successful')
 	} catch (err) {
 		next(err)
 	}

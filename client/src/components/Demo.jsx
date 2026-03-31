@@ -382,6 +382,7 @@ export default function Demo() {
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(13, 148, 136, 0.4)' }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => window.location.href='/auth'} 
               className="px-8 py-3 bg-gradient-to-r from-teal-600 to-teal-700 text-white rounded-lg font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/30"
             >
               Try Demo

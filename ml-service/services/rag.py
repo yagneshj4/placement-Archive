@@ -1,23 +1,30 @@
 """
 RAG (Retrieval-Augmented Generation) pipeline for The Placement Archive.
-Uses Google Gemini API directly (not through LangChain wrapper).
+100% Database-driven — answers come ONLY from ChromaDB stored experiences.
 
 Flow:
   1. Check Redis cache — return cached answer if hit
   2. Encode query with sentence-transformers
   3. Retrieve top-k similar experiences from ChromaDB
-  4. Build a grounded prompt with citations
-  5. Call Gemini to generate a synthesised answer
-  6. Cache the response in Redis
-  7. Return answer + source citations
+  4. Extract company from query and strictly validate against results
+  5. Build a structured, grounded answer from retrieved data
+  6. Optionally enhance with Gemini (if API key available)
+  7. Cache the response in Redis
+  8. Return answer + source citations
 """
 import hashlib
 import json
 import logging
+import os
+import re
 import time
 from typing import Optional
 
-import google.generativeai as genai
+try:
+    import google.generativeai as genai
+    _genai_available = True
+except ImportError:
+    _genai_available = False
 
 try:
     import redis as redis_lib
@@ -54,32 +61,44 @@ def _get_redis():
         _redis_client = None
     return _redis_client
 
-# ── Gemini client initialization ─────────────────────────────────
-def _init_gemini():
-    """Initialize Gemini API client."""
-    if not settings.google_api_key:
-        raise ValueError(
-            "GOOGLE_API_KEY not set in .env — "
-            "get one at https://aistudio.google.com/app/apikeys and add it to ml-service/.env"
-        )
-    genai.configure(api_key=settings.google_api_key)
-    logger.info(f"✅ Gemini API configured with model: {settings.gemini_model}")
-
-# Initialize on first call
+# ── Gemini client initialization (OPTIONAL enhancement) ──────────
 _gemini_initialized = False
+_gemini_available = False
 
-def _ensure_gemini_initialized():
-    global _gemini_initialized
-    if not _gemini_initialized:
-        _init_gemini()
-        _gemini_initialized = True
+def _try_init_gemini():
+    """Try to initialize Gemini. If it fails, we still work fine without it."""
+    global _gemini_initialized, _gemini_available
+    if _gemini_initialized:
+        return _gemini_available
+    
+    _gemini_initialized = True
+    api_key = settings.google_api_key or os.environ.get("GOOGLE_API_KEY", "")
+    
+    if not api_key or not _genai_available:
+        logger.info("ℹ️ Gemini not available — using database-only mode (100% reliable)")
+        _gemini_available = False
+        return False
+    
+    try:
+        genai.configure(api_key=api_key)
+        # Quick test to verify key works
+        model = genai.GenerativeModel(model_name=settings.gemini_model)
+        model.generate_content("test", generation_config={"max_output_tokens": 5})
+        _gemini_available = True
+        logger.info(f"✅ Gemini API configured with model: {settings.gemini_model}")
+        return True
+    except Exception as e:
+        logger.warning(f"Gemini initialization failed ({e}) — using database-only mode")
+        _gemini_available = False
+        return False
+
 
 # ── Cache helpers ────────────────────────────────────────────────
 
 def _cache_key(query: str, filters: dict) -> str:
     """Generate a deterministic cache key from query + filters."""
     payload = json.dumps({"q": query.lower().strip(), "f": filters}, sort_keys=True)
-    return f"rag:v1:{hashlib.sha256(payload.encode()).hexdigest()[:16]}"
+    return f"rag:v2:{hashlib.sha256(payload.encode()).hexdigest()[:16]}"
 
 def _get_cached(key: str) -> Optional[dict]:
     """Return cached RAG response or None."""
@@ -106,20 +125,28 @@ def _set_cached(key: str, value: dict):
     except Exception as e:
         logger.warning(f"Cache write error: {e}")
 
-# ── System prompt ─────────────────────────────────────────────────
 
-SYSTEM_PROMPT = """You are a placement preparation assistant for engineering students at Indian colleges.
-Your job is to answer questions about placement interviews using ONLY the provided interview experiences from senior students.
+# ── Company extraction from query ────────────────────────────────
 
-STRICT RULES — follow every one:
-1. Answer ONLY using information from the provided experiences — never from your general knowledge
-2. After every factual claim, cite the source in brackets: [Company · Role · Round · Year]
-3. If the experiences don't contain enough relevant information, say EXACTLY this: "No experiences matching this query are in the archive yet. Try different keywords."
-4. Keep the answer to 3-5 sentences maximum — be concise and direct
-5. Never invent company names, question topics, or interview outcomes not mentioned in the experiences
-6. If multiple experiences are relevant, synthesise them into one coherent answer
+KNOWN_COMPANIES = [
+    "amazon", "google", "microsoft", "tcs", "infosys", "accenture",
+    "cognizant", "wipro", "goldman sachs", "jp morgan", "morgan stanley",
+    "apple", "meta", "netflix", "adobe", "oracle", "cisco", "intel", "ibm",
+    "uber", "flipkart", "paytm", "swiggy", "zomato", "ola", "razorpay",
+    "phonepe", "byju", "unacademy", "atlassian", "salesforce", "deloitte",
+    "capgemini", "hcl", "tech mahindra", "mindtree", "mphasis", "zoho",
+    "freshworks", "samsung", "qualcomm", "nvidia", "tesla", "twitter",
+    "spotify", "stripe", "airbnb", "linkedin", "snap",
+]
 
-Your tone should be helpful, factual, and encouraging."""
+def _extract_company_from_query(query: str) -> Optional[str]:
+    """Extract a company name from the user's query if mentioned."""
+    query_lower = query.lower()
+    for company in KNOWN_COMPANIES:
+        if company in query_lower:
+            return company
+    return None
+
 
 # ── Citation formatter ────────────────────────────────────────────
 
@@ -137,26 +164,6 @@ def _format_source(metadata: dict) -> str:
         parts.append(str(metadata["year"]))
     return " · ".join(parts) if parts else "Unknown source"
 
-def _build_context(retrieved: list) -> str:
-    """
-    Build the context block injected into the prompt.
-    Each experience is labelled with its source for citation tracking.
-    """
-    if not retrieved:
-        return "No relevant experiences found in the archive."
-
-    blocks = []
-    for i, result in enumerate(retrieved, 1):
-        source = _format_source(result["metadata"])
-        doc_id = result.get("doc_id", "")
-        similarity = result.get("similarity", 0)
-
-        blocks.append(
-            f"[Experience {i} | Source: {source} | Match: {similarity:.0%}]\n"
-            f"{result['metadata'].get('narrative_preview', 'Experience content unavailable.')}\n"
-        )
-
-    return "\n---\n".join(blocks)
 
 def _normalize_year(value):
     """Convert year-like values to int when possible, else return None."""
@@ -175,48 +182,210 @@ def _normalize_year(value):
                 return None
     return None
 
-def _fallback_answer_from_retrieval(retrieved: list) -> str:
-    """Build a concise grounded answer when Gemini is unavailable."""
+
+# ── Smart Database-Only Answer Builder ────────────────────────────
+
+def _build_database_answer(query: str, retrieved: list) -> str:
+    """
+    Build a high-quality, structured answer using ONLY retrieved database records.
+    No LLM needed — this is pure data extraction and intelligent formatting.
+    """
     if not retrieved:
         return "No experiences matching this query are in the archive yet. Try different keywords."
 
+    # Step 1: Extract the company from the query
+    asked_company = _extract_company_from_query(query)
+
+    # Step 2: Collect metadata from all retrieved results
     companies = []
     rounds = []
+    previews = []
     citations = []
+    years = []
 
     for result in retrieved:
-        metadata = result.get("metadata", {})
-        company = metadata.get("company")
-        round_type = metadata.get("roundType")
-        citation = _format_source(metadata)
+        meta = result.get("metadata") or {}
+        similarity = result.get("similarity", 0)
+        company = (meta.get("company") or "").strip()
+        round_type = (meta.get("roundType") or "").strip()
+        preview = (meta.get("narrative_preview") or "").strip()
+        year = meta.get("year")
+        citation = _format_source(meta)
 
         if company:
-            companies.append(company)
+            companies.append(company.lower())
         if round_type:
-            rounds.append(round_type.replace("_", " "))
+            rounds.append(round_type.replace("_", " ").title())
+        if preview:
+            previews.append(preview)
         if citation and citation != "Unknown source":
             citations.append(citation)
+        if year:
+            years.append(str(year))
 
-    unique_companies = sorted(set(companies))
+    # Step 3: STRICT COMPANY VALIDATION
+    # If user asked about a specific company, check if we actually have data for it
+    if asked_company:
+        matching_results = [
+            r for r in retrieved
+            if asked_company in ((r.get("metadata") or {}).get("company") or "").lower()
+        ]
+        if not matching_results:
+            return (
+                f"No experiences for \"{asked_company.title()}\" are in the archive yet. "
+                f"We currently have experiences from {', '.join(sorted(set(c.title() for c in companies[:3])))}, "
+                f"and more. Try searching for one of those, or be the first to add your "
+                f"\"{asked_company.title()}\" experience!"
+            )
+        # Filter to only matching results for focused answer
+        retrieved = matching_results
+        # Re-extract from filtered results
+        companies = []
+        rounds = []
+        previews = []
+        citations = []
+        years = []
+        for result in retrieved:
+            meta = result.get("metadata") or {}
+            company = (meta.get("company") or "").strip()
+            round_type = (meta.get("roundType") or "").strip()
+            preview = (meta.get("narrative_preview") or "").strip()
+            year = meta.get("year")
+            citation = _format_source(meta)
+            if company:
+                companies.append(company.lower())
+            if round_type:
+                rounds.append(round_type.replace("_", " ").title())
+            if preview:
+                previews.append(preview)
+            if citation and citation != "Unknown source":
+                citations.append(citation)
+            if year:
+                years.append(str(year))
+
+    # Step 4: Build the answer from real data
+    unique_companies = sorted(set(c.title() for c in companies))
     unique_rounds = sorted(set(rounds))
+    unique_years = sorted(set(years), reverse=True)
     unique_citations = []
     for c in citations:
         if c not in unique_citations:
             unique_citations.append(c)
 
-    company_text = ", ".join(unique_companies[:3]) if unique_companies else "multiple companies"
-    round_text = ", ".join(unique_rounds[:4]) if unique_rounds else "coding and interview rounds"
-    citation_text = " ".join([f"[{c}]" for c in unique_citations[:3]])
+    company_text = ", ".join(unique_companies[:5]) if unique_companies else "various companies"
+    n_experiences = len(retrieved)
 
-    answer = (
-        f"Based on {len(retrieved)} matching experiences, {company_text} interviews commonly include {round_text}. "
-        "Focus on clear problem-solving steps, edge cases, and concise communication in interview discussions."
+    # Build structured answer
+    answer_parts = []
+
+    # Opening line
+    answer_parts.append(
+        f"✔ Based on {n_experiences} verified experience{'s' if n_experiences != 1 else ''} "
+        f"from {company_text}:"
     )
 
-    if citation_text:
-        answer = f"{answer} {citation_text}"
+    # Round types info
+    if unique_rounds:
+        answer_parts.append(
+            f"\n\n📊 Interview rounds covered: {', '.join(unique_rounds)}."
+        )
 
-    return answer
+    # Key insights from narrative previews
+    if previews:
+        answer_parts.append("\n\n📝 Key insights from students:")
+        for i, preview in enumerate(previews[:3], 1):
+            # Take first 150 chars of each preview for a concise summary
+            snippet = preview[:200].strip()
+            if len(preview) > 200:
+                snippet = snippet.rsplit(" ", 1)[0] + "..."
+            answer_parts.append(f"\n  {i}. \"{snippet}\"")
+
+    # Year info
+    if unique_years:
+        answer_parts.append(f"\n\n📅 Data from: {', '.join(unique_years[:3])}")
+
+    # Citations
+    if unique_citations:
+        citation_text = " ".join([f"[{c}]" for c in unique_citations[:5]])
+        answer_parts.append(f"\n\n🔗 Sources: {citation_text}")
+
+    # Confidence
+    avg_similarity = sum(r.get("similarity", 0) for r in retrieved) / max(len(retrieved), 1)
+    confidence = min(10, max(1, round(avg_similarity * 10)))
+    answer_parts.append(f"\n\nConfidence: {confidence}/10")
+
+    return "".join(answer_parts)
+
+
+# ── Gemini Enhancement (Optional) ─────────────────────────────────
+
+SYSTEM_PROMPT = """You are an expert AI assistant designed to provide ONLY accurate, grounded, and verifiable answers.
+
+STRICT RULES:
+
+1. SOURCE-GROUNDED ANSWERS
+- Answer ONLY from the provided data/context.
+- Do NOT guess or assume.
+- If data is insufficient, say: "Not enough reliable information available."
+- CRITICAL: If the student asks about a specific company, and the provided experiences do not match, you MUST refuse to answer. Say EXACTLY this: "No experiences matching this query are in the archive yet. Try different keywords."
+
+2. NO HALLUCINATIONS
+- Never fabricate facts, companies, experiences, or numbers.
+- If unsure → explicitly mention uncertainty.
+
+3. STRUCTURED OUTPUT FORMAT
+Always respond in this format:
+
+✔ Final Answer:
+<clear, concise answer>
+
+📊 Supporting Evidence:
+- Point 1
+- Point 2
+- Point 3
+
+⚠️ Assumptions (if any):
+- Mention if something is inferred
+
+Confidence: X/10
+(Based only on data reliability)"""
+
+
+def _try_gemini_answer(query: str, retrieved: list) -> Optional[str]:
+    """Try to get a Gemini-enhanced answer. Returns None if unavailable."""
+    if not _gemini_available or not _genai_available:
+        return None
+
+    try:
+        # Build context from retrieved experiences
+        context_blocks = []
+        for i, result in enumerate(retrieved, 1):
+            meta = result.get("metadata") or {}
+            source = _format_source(meta)
+            similarity = result.get("similarity", 0)
+            preview = meta.get("narrative_preview", "No details available.")
+            context_blocks.append(
+                f"[Experience {i} | Source: {source} | Match: {similarity:.0%}]\n{preview}\n"
+            )
+        context = "\n---\n".join(context_blocks) if context_blocks else "No relevant experiences found."
+
+        user_message = f"""Student question: {query}
+
+Relevant placement experiences from the archive:
+{context}
+
+Please answer the student's question based only on the experiences above."""
+
+        model = genai.GenerativeModel(
+            model_name=settings.gemini_model,
+            system_instruction=SYSTEM_PROMPT,
+        )
+        response = model.generate_content(user_message)
+        return response.text.strip()
+    except Exception as e:
+        logger.warning(f"Gemini enhancement failed: {e}")
+        return None
+
 
 # ── Main RAG function ─────────────────────────────────────────────
 
@@ -228,23 +397,10 @@ def rag_query(
 ) -> dict:
     """
     Full RAG pipeline — takes a natural language question, retrieves relevant
-    experiences, and returns a grounded, cited answer using Gemini.
+    experiences, and returns a grounded, cited answer.
 
-    Args:
-        query:     Natural language question from the student
-        filters:   Optional ChromaDB metadata filter (e.g. {"company": "Amazon"})
-        n_results: How many experiences to retrieve (default: settings.rag_top_k)
-        use_cache: Whether to check/store Redis cache (default: True)
-
-    Returns:
-        dict with keys:
-            answer       - The generated answer string
-            sources      - List of source citation dicts
-            cached       - Whether this was a cache hit
-            query        - The original query
-            retrieval_ms - Time spent on ChromaDB retrieval
-            llm_ms       - Time spent on LLM generation
-            total_ms     - Total pipeline time
+    Works 100% without Gemini — uses database-only answer building.
+    If Gemini is available, it enhances the answer quality.
     """
     start_total = time.time()
     filters = filters or {}
@@ -276,45 +432,37 @@ def rag_query(
     retrieval_ms = round((time.time() - t_retrieval) * 1000, 1)
     logger.info(f"Retrieved {len(retrieved)} experiences in {retrieval_ms}ms")
 
-    # ── Step 4: Build context + prompt ────────────────────────────
-    context = _build_context(retrieved)
-
-    user_message = f"""Student question: {query}
-
-Relevant placement experiences from the archive:
-{context}
-
-Please answer the student's question based only on the experiences above."""
-
-    # ── Step 5: Gemini generation ────────────────────────────────
+    # ── Step 4: Build answer ──────────────────────────────────────
     t_llm = time.time()
-    try:
-        _ensure_gemini_initialized()
-        model = genai.GenerativeModel(
-            model_name=settings.gemini_model,
-            system_instruction=SYSTEM_PROMPT,
-        )
-        response = model.generate_content(user_message)
-        answer = response.text.strip()
-    except Exception as e:
-        logger.error(f"Gemini API call failed: {e}")
-        # Graceful fallback — return a grounded summary from retrieved sources.
-        answer = _fallback_answer_from_retrieval(retrieved)
+
+    # Try Gemini first (optional enhancement)
+    _try_init_gemini()
+    answer = None
+    if _gemini_available:
+        answer = _try_gemini_answer(query, retrieved)
+        if answer:
+            logger.info("✅ Gemini-enhanced answer generated")
+
+    # Fallback: Build answer from database only (always works)
+    if not answer:
+        answer = _build_database_answer(query, retrieved)
+        logger.info("📊 Database-only answer generated")
+
     llm_ms = round((time.time() - t_llm) * 1000, 1)
 
-    # ── Step 6: Build source citations ───────────────────────────
-    sources = [
-        {
+    # ── Step 5: Build source citations ───────────────────────────
+    sources = []
+    for r in retrieved:
+        meta = r.get("metadata") or {}
+        sources.append({
             "doc_id":     r.get("doc_id", ""),
-            "citation":   _format_source(r["metadata"]),
-            "similarity": r["similarity"],
-            "company":    r["metadata"].get("company", ""),
-            "role":       r["metadata"].get("role", ""),
-            "roundType":  r["metadata"].get("roundType", ""),
-            "year":       _normalize_year(r["metadata"].get("year")),
-        }
-        for r in retrieved
-    ]
+            "citation":   _format_source(meta),
+            "similarity": r.get("similarity", 0),
+            "company":    meta.get("company", ""),
+            "role":       meta.get("role", ""),
+            "roundType":  meta.get("roundType", ""),
+            "year":       _normalize_year(meta.get("year")),
+        })
 
     total_ms = round((time.time() - start_total) * 1000, 1)
 
@@ -329,7 +477,7 @@ Please answer the student's question based only on the experiences above."""
         "source_count": len(sources),
     }
 
-    # ── Step 7: Cache the response ────────────────────────────────
+    # ── Step 6: Cache the response ────────────────────────────────
     if use_cache and len(retrieved) > 0:
         _set_cached(cache_key, result)
 

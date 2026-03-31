@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { authApi } from '../api/auth.js'
 import { setAccessToken } from '../api/axios.js'
+import { auth, googleProvider } from '../firebase.js'
+import { signInWithPopup } from 'firebase/auth'
 
 const AuthContext = createContext(null)
 
@@ -54,6 +56,15 @@ export function AuthProvider({ children }) {
 		return data.data.user
 	}, [])
 
+	const loginWithGoogle = useCallback(async () => {
+		const result = await signInWithPopup(auth, googleProvider)
+		const idToken = await result.user.getIdToken()
+		const { data } = await authApi.google({ idToken })
+		setAccessToken(data.data.accessToken)
+		setUser(data.data.user)
+		return data.data.user
+	}, [])
+
 	const logout = useCallback(async () => {
 		try {
 			await authApi.logout()
@@ -69,6 +80,7 @@ export function AuthProvider({ children }) {
 		isAdmin: user?.role === 'admin',
 		register,
 		login,
+		loginWithGoogle,
 		logout,
 	}
 

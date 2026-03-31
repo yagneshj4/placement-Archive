@@ -40,6 +40,19 @@ export default function Landing() {
   return (
     <div className="bg-white min-h-screen text-gray-900 font-sans overflow-x-hidden selection:bg-accent-violet/20 border-t-[0px]">
       
+      {/* Header */}
+      <header className="relative z-[9999] flex items-center justify-between px-6 lg:px-12 py-6 max-w-7xl mx-auto">
+        <Link to="/" className="font-bold text-gray-900 text-lg tracking-tight flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center shadow-md">
+            <span className="text-white text-sm">◆</span>
+          </div>
+          The Placement Archive
+        </Link>
+        <a href="/auth" className="px-6 py-2.5 text-sm font-bold text-gray-900 bg-white border border-gray-200 hover:border-gray-300 rounded-xl hover:bg-gray-50 hover:shadow-sm transition-all cursor-pointer">
+          Sign In
+        </a>
+      </header>
+
       {/* 1. The Incredible Clean Hero */}
       <Hero />
 

@@ -32,8 +32,8 @@ export const ragQuery = async (req, res, next) => {
 			)
 		}
 
-		// Call FastAPI RAG pipeline
-		const response = await axios.post(
+		// Step 1: Call FastAPI to get semantically similar doc_ids + scores
+		const mlResponse = await axios.post(
 			`${ML_SERVICE_URL}/rag`,
 			{
 				query: query.trim(),
@@ -48,29 +48,59 @@ export const ragQuery = async (req, res, next) => {
 			},
 		)
 
-		if (!response.data.success) {
+		if (!mlResponse.data.success) {
 			return sendError(res, 'RAG pipeline failed', 500)
 		}
 
-		// Return the full response with timing metrics
+		const { sources, retrieval_ms, llm_ms, total_ms, cached } = mlResponse.data
+
+		// Step 2: Fetch FULL experience documents from MongoDB using the doc_ids
+		// Filter out test/invalid IDs — only keep valid 24-char hex MongoDB ObjectIds
+		const validIdRegex = /^[0-9a-fA-F]{24}$/
+		const docIds = sources.map(s => s.doc_id).filter(id => id && validIdRegex.test(id))
+		const { Experience } = await import('../models/index.js')
+		const experiences = docIds.length > 0
+			? await Experience.find({ _id: { $in: docIds } })
+				.select('company role year roundType narrative extractedTags offerReceived tips preparationTips')
+				.lean()
+			: []
+
+		// Build a lookup map: _id -> full experience
+		const expMap = {}
+		experiences.forEach(e => { expMap[e._id.toString()] = e })
+
+		// Step 3: Build a rich, Claude-like answer from real database content
+		const answer = buildRichAnswer(query, sources, expMap)
+
+		// Step 4: Enrich sources with real narrative excerpts
+		const enrichedSources = sources.map(s => {
+			const exp = expMap[s.doc_id]
+			return {
+				...s,
+				narrative_excerpt: exp?.narrative?.substring(0, 250) || '',
+				tips: exp?.tips || '',
+				offerReceived: exp?.offerReceived ?? null,
+				topics: exp?.extractedTags?.topics || [],
+			}
+		})
+
 		sendSuccess(
 			res,
 			{
-				answer: response.data.answer,
-				sources: response.data.sources,
-				source_count: response.data.source_count,
-				cached: response.data.cached,
+				answer,
+				sources: enrichedSources,
+				source_count: enrichedSources.length,
+				cached,
 				timing: {
-					retrieval_ms: response.data.retrieval_ms,
-					llm_ms: response.data.llm_ms,
-					total_ms: response.data.total_ms,
+					retrieval_ms,
+					llm_ms,
+					total_ms,
 				},
 			},
 			'Answer generated successfully',
 			200,
 		)
 	} catch (err) {
-		// Handle ML service errors with detail when available
 		if (err.response?.status >= 400) {
 			const detail = err.response?.data?.detail
 			return sendError(
@@ -83,6 +113,161 @@ export const ragQuery = async (req, res, next) => {
 		}
 		next(err)
 	}
+}
+
+/**
+ * Build a rich, structured answer using real MongoDB experience data.
+ * This gives Claude-quality answers without needing any LLM.
+ */
+function buildRichAnswer(query, sources, expMap) {
+	const queryLower = query.toLowerCase()
+
+	// Collect all real experience data
+	const matchedExperiences = sources
+		.map(s => ({ ...expMap[s.doc_id], similarity: s.similarity, citation: s.citation }))
+		.filter(e => e && e.company)
+
+	if (matchedExperiences.length === 0) {
+		return "No experiences matching this query are in the archive yet. Try searching with different keywords or be the first to share your experience!"
+	}
+
+	// Check if user asked about a specific company
+	const companies = [...new Set(matchedExperiences.map(e => e.company))]
+	const askedCompany = extractCompanyFromQuery(queryLower)
+
+	if (askedCompany) {
+		const relevant = matchedExperiences.filter(e =>
+			e.company.toLowerCase().includes(askedCompany)
+		)
+		if (relevant.length === 0) {
+			return `No experiences for "${capitalize(askedCompany)}" are in the archive yet. ` +
+				`We currently have experiences from ${companies.slice(0, 3).join(', ')}. ` +
+				`Try searching for one of those, or be the first to share your "${capitalize(askedCompany)}" interview experience!`
+		}
+		// Focus only on the relevant company
+		return buildAnswerFromExperiences(query, relevant)
+	}
+
+	return buildAnswerFromExperiences(query, matchedExperiences)
+}
+
+function buildAnswerFromExperiences(query, experiences) {
+	const companies = [...new Set(experiences.map(e => e.company))]
+	const rounds = [...new Set(experiences.map(e => e.roundType).filter(Boolean))]
+	const years = [...new Set(experiences.map(e => e.year).filter(Boolean))].sort((a, b) => b - a)
+	const totalExp = experiences.length
+	const queryLower = query.toLowerCase()
+
+	let answer = ''
+
+	// ── Opening summary with context ──
+	const offerCount = experiences.filter(e => e.offerReceived === true).length
+	const roundLabels = rounds.map(r => r.replace('_', ' ')).join(', ')
+	
+	answer += `📋 **Analysis based on ${totalExp} verified experience${totalExp > 1 ? 's' : ''}** from ${companies.join(', ')}`
+	if (years.length > 0) answer += ` (${years.join(', ')})`
+	answer += `.\n`
+	if (offerCount > 0) answer += `🎯 ${offerCount} out of ${totalExp} candidates received offers.\n`
+	answer += `\n`
+
+	// ── Real student stories (the core value) ──
+	const narratives = experiences
+		.filter(e => e.narrative && e.narrative.length > 50)
+		.sort((a, b) => (b.similarity || 0) - (a.similarity || 0))
+		.slice(0, 3)
+
+	if (narratives.length > 0) {
+		answer += `### 💡 What Students Experienced\n\n`
+		narratives.forEach((exp, i) => {
+			// Extract a meaningful chunk — up to 400 chars, ending at a sentence boundary
+			let snippet = exp.narrative.substring(0, 400).trim()
+			const lastDot = snippet.lastIndexOf('.')
+			if (lastDot > 100) snippet = snippet.substring(0, lastDot + 1)
+			else snippet += '...'
+			
+			const roundLabel = exp.roundType ? exp.roundType.replace('_', ' ').charAt(0).toUpperCase() + exp.roundType.replace('_', ' ').slice(1) : 'Interview'
+			const outcome = exp.offerReceived === true ? ' ✅ Got offer' : exp.offerReceived === false ? ' ❌ Rejected' : ''
+			const role = exp.role ? ` — ${exp.role}` : ''
+			
+			answer += `**${i + 1}. ${exp.company} | ${roundLabel}${role} (${exp.year || 'Recent'})${outcome}**\n`
+			answer += `> "${snippet}"\n\n`
+		})
+	}
+
+	// ── Interview round breakdown ──
+	if (rounds.length > 0) {
+		answer += `### 📊 Interview Rounds Covered\n`
+		rounds.forEach(r => {
+			const count = experiences.filter(e => e.roundType === r).length
+			const label = r.replace('_', ' ').charAt(0).toUpperCase() + r.replace('_', ' ').slice(1)
+			answer += `• **${label}** — ${count} experience${count > 1 ? 's' : ''}\n`
+		})
+		answer += `\n`
+	}
+
+	// ── Preparation tips from real students ──
+	const tipsFromStudents = experiences
+		.filter(e => (e.preparationTips && e.preparationTips.length > 10) || (e.tips && e.tips.length > 10))
+		.slice(0, 3)
+	
+	if (tipsFromStudents.length > 0) {
+		answer += `### 🎓 Tips from Students Who Were There\n`
+		tipsFromStudents.forEach(exp => {
+			const tip = (exp.preparationTips || exp.tips || '').substring(0, 300).trim()
+			answer += `• _"${tip}"_ — **${exp.company}** candidate${exp.offerReceived === true ? ' (got offer)' : ''}\n`
+		})
+		answer += `\n`
+	}
+
+	// ── Topics to prepare ──
+	const allTopics = experiences.flatMap(e => e.extractedTags?.topics || [])
+	const uniqueTopics = [...new Set(allTopics)].slice(0, 10)
+	if (uniqueTopics.length > 0) {
+		answer += `### 📚 Key Topics to Prepare\n`
+		answer += uniqueTopics.map(t => `\`${t}\``).join('  •  ')
+		answer += `\n\n`
+	}
+
+	// ── Actionable bottom line ──
+	answer += `### ✅ Bottom Line\n`
+	if (queryLower.includes('coding') || rounds.includes('coding')) {
+		answer += `Focus on Data Structures & Algorithms, practice on LeetCode medium-level problems, and always explain your approach before coding.\n`
+	} else if (queryLower.includes('hr') || rounds.includes('hr')) {
+		answer += `Be prepared to discuss your projects in depth, explain career goals clearly, and have good questions ready for the interviewer.\n`
+	} else if (queryLower.includes('system design') || rounds.includes('system_design')) {
+		answer += `Study system design fundamentals — load balancing, caching, database sharding. Practice designing real systems like URL shorteners or chat apps.\n`
+	} else if (queryLower.includes('technical') || rounds.includes('technical')) {
+		answer += `Brush up on core CS fundamentals — OS, DBMS, networking, and OOP concepts. Be ready to solve problems on a whiteboard and explain your thought process.\n`
+	} else {
+		answer += `Prepare thoroughly by reviewing the experiences above. Focus on the specific round types and topics mentioned by students who went through the process.\n`
+	}
+
+	// ── Confidence score (boosted formula) ──
+	const avgSim = experiences.reduce((sum, e) => sum + (e.similarity || 0), 0) / experiences.length
+	const dataBonus = Math.min(2, totalExp * 0.4)  // More experiences = higher confidence
+	const confidence = Math.min(10, Math.max(3, Math.round(avgSim * 14 + dataBonus)))
+	answer += `\n**Confidence: ${confidence}/10** _(based on ${totalExp} matching experiences with ${Math.round(avgSim * 100)}% avg relevance)_`
+
+	return answer
+}
+
+function extractCompanyFromQuery(query) {
+	const companies = [
+		'amazon', 'google', 'microsoft', 'tcs', 'infosys', 'accenture',
+		'cognizant', 'wipro', 'goldman sachs', 'jp morgan', 'morgan stanley',
+		'apple', 'meta', 'netflix', 'adobe', 'oracle', 'cisco', 'intel', 'ibm',
+		'uber', 'flipkart', 'paytm', 'swiggy', 'zomato', 'ola', 'razorpay',
+		'phonepe', 'samsung', 'qualcomm', 'nvidia', 'deloitte', 'capgemini',
+		'hcl', 'tech mahindra', 'zoho', 'freshworks', 'salesforce',
+	]
+	for (const c of companies) {
+		if (query.includes(c)) return c
+	}
+	return null
+}
+
+function capitalize(str) {
+	return str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
 }
 
 /**

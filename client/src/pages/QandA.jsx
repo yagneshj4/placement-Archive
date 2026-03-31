@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import axios from '../api/axios'
+import ReactMarkdown from 'react-markdown'
 import PageWrapper from '../components/layout/PageWrapper'
 import { AlertCircle, Loader2, CheckCircle, Clock, Search } from 'lucide-react'
 
@@ -162,7 +163,18 @@ export default function QandA() {
                 <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">AI Synthesis</h2>
               </div>
               
-              <p className="text-gray-800 leading-[1.8] mb-6 font-medium text-[15px] whitespace-pre-wrap">{answer}</p>
+              <div className="prose prose-gray max-w-none mb-6 text-[15px] leading-[1.8]
+                [&_h3]:text-[16px] [&_h3]:font-extrabold [&_h3]:text-gray-900 [&_h3]:mt-6 [&_h3]:mb-3 [&_h3]:tracking-tight
+                [&_strong]:font-extrabold [&_strong]:text-gray-900
+                [&_em]:text-gray-600 [&_em]:not-italic [&_em]:font-medium
+                [&_p]:text-gray-700 [&_p]:font-medium [&_p]:mb-3
+                [&_blockquote]:border-l-4 [&_blockquote]:border-teal-400 [&_blockquote]:bg-teal-50/50 [&_blockquote]:pl-4 [&_blockquote]:py-2 [&_blockquote]:pr-3 [&_blockquote]:rounded-r-xl [&_blockquote]:my-2 [&_blockquote]:text-gray-700 [&_blockquote]:italic [&_blockquote]:text-[14px]
+                [&_ul]:space-y-1.5 [&_ul]:my-2
+                [&_li]:text-gray-700 [&_li]:font-medium [&_li]:text-[14px]
+                [&_code]:bg-gray-100 [&_code]:text-teal-700 [&_code]:px-2 [&_code]:py-0.5 [&_code]:rounded-md [&_code]:text-[13px] [&_code]:font-bold [&_code]:border [&_code]:border-gray-200
+              ">
+                <ReactMarkdown>{answer}</ReactMarkdown>
+              </div>
               
               <div className="flex items-center justify-between pt-5 border-t border-gray-100">
                 {sources.length > 0 && (

@@ -1,6 +1,11 @@
 import jwt from 'jsonwebtoken'
+import admin from 'firebase-admin'
 import { User } from '../models/index.js'
 import { AppError } from '../middleware/error.middleware.js'
+
+if (!admin.apps.length) {
+	admin.initializeApp({ projectId: 'the-placement-archive-b283b' });
+}
 
 // Token generation
 export const generateAccessToken = (userId, role) => {
@@ -81,6 +86,46 @@ export const loginUser = async ({ email, password }) => {
 	const refreshToken = generateRefreshToken(user._id)
 
 	return { user: user.toSafeObject(), accessToken, refreshToken }
+}
+
+// Google Login
+export const loginWithGoogle = async ({ idToken }) => {
+	if (!idToken) {
+		throw new AppError('No Google ID token provided', 400);
+	}
+
+	let decodedToken;
+	try {
+		decodedToken = await admin.auth().verifyIdToken(idToken);
+	} catch (error) {
+		throw new AppError('Invalid Google authentication token', 401);
+	}
+
+	const { email, name, picture } = decodedToken;
+
+	if (!email) {
+		throw new AppError('Google account has no email attached', 400);
+	}
+
+	let user = await User.findOne({ email: email.toLowerCase().trim() });
+
+	if (!user) {
+		user = await User.create({
+			name: name || 'Google User',
+			email: email.toLowerCase().trim(),
+			passwordHash: 'GOOGLE_SSO_' + Math.random().toString(36).slice(-8),
+			college: 'VR Siddhartha Engineering College',
+			isVerified: true,
+		});
+	}
+
+	user.lastActive = new Date();
+	await user.save({ validateBeforeSave: false });
+
+	const accessToken = generateAccessToken(user._id, user.role);
+	const refreshToken = generateRefreshToken(user._id);
+
+	return { user: user.toSafeObject(), accessToken, refreshToken };
 }
 
 // Refresh access token

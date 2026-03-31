@@ -1,9 +1,13 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 from pathlib import Path
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_FILE = BASE_DIR / '.env'
+
+# Manually load .env to ensure google_api_key is available
+load_dotenv(str(ENV_FILE))
 
 class Settings(BaseSettings):
     # Server

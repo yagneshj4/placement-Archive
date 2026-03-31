@@ -92,17 +92,17 @@ async def answer_question(request: RAGRequest):
 
 @router.get("/health")
 async def rag_health():
-    """Check if RAG pipeline is ready (has LLM + ChromaDB + Redis)."""
+    """Check if RAG pipeline is ready (has ChromaDB + optionally Gemini + Redis)."""
     try:
-        from services.rag import _get_llm, _get_redis
+        from services.rag import _try_init_gemini, _get_redis, _gemini_available
         from services.vector_store import get_collection
 
-        llm_ready = False
+        gemini_ready = False
         try:
-            _get_llm()
-            llm_ready = True
+            _try_init_gemini()
+            gemini_ready = _gemini_available
         except Exception as e:
-            logger.warning(f"LLM not ready: {e}")
+            logger.warning(f"Gemini not ready: {e}")
 
         redis_ready = _get_redis() is not None
 
@@ -110,8 +110,9 @@ async def rag_health():
         chroma_ready = collection is not None and collection.count() > 0
 
         return {
-            "status": "ok" if (llm_ready and chroma_ready) else "degraded",
-            "llm_ready": llm_ready,
+            "status": "ok" if chroma_ready else "degraded",
+            "mode": "gemini_enhanced" if gemini_ready else "database_only",
+            "gemini_ready": gemini_ready,
             "redis_ready": redis_ready,
             "chroma_ready": chroma_ready,
             "experiences_indexed": collection.count() if chroma_ready else 0,
