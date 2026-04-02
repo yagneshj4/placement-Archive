@@ -19,8 +19,8 @@ class Settings(BaseSettings):
     embedding_model: str = "all-MiniLM-L6-v2"
     embedding_dimension: int = 384
 
-    # ChromaDB
-    chroma_persist_dir: str = "./chroma_data"
+    # ChromaDB  — must write to /tmp on HF Spaces (read-only container filesystem)
+    chroma_persist_dir: str = "/tmp/chroma_data"
     chroma_collection_experiences: str = "experiences"
     chroma_collection_questions: str = "questions"
 

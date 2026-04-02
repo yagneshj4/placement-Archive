@@ -20,8 +20,11 @@ import re
 import time
 from typing import Optional
 
+import warnings as _warnings
 try:
-    import google.generativeai as genai
+    with _warnings.catch_warnings():
+        _warnings.filterwarnings("ignore", category=FutureWarning, module="google")
+        import google.generativeai as genai
     _genai_available = True
 except ImportError:
     _genai_available = False

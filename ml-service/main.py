@@ -6,10 +6,18 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 import sys
 
+# ── Force cache dirs to /tmp — the only writable path on HF Spaces ─────────
+# (These override any different values that might come from .env)
+os.environ.setdefault("HF_HOME", "/tmp/.cache/huggingface")
+os.environ.setdefault("TRANSFORMERS_CACHE", "/tmp/.cache/huggingface/hub")
+os.environ.setdefault("SENTENCE_TRANSFORMERS_HOME", "/tmp/.cache/sentence_transformers")
+os.environ.setdefault("XDG_CACHE_HOME", "/tmp/.cache")
+
 # Keep startup logs focused by reducing TensorFlow/oneDNN noise from transitive deps.
 os.environ.setdefault("TF_ENABLE_ONEDNN_OPTS", "0")
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 warnings.filterwarnings("ignore", message=".*tf.losses.sparse_softmax_cross_entropy.*")
+warnings.filterwarnings("ignore", category=FutureWarning, module="google")
 
 from config.settings import settings
 from services.embedding import load_model
