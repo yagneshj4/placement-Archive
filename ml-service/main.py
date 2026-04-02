@@ -24,7 +24,7 @@ from services.embedding import load_model
 from services.vector_store import init_chroma
 from services.tagger import load_taggers
 from services.difficulty import load_difficulty_model
-from routers import health, embed, search, autotag, rag, difficulty
+from routers import health, embed, search, autotag, rag, difficulty, sync
 
 # ── Logging setup ────────────────────────────────────────────────
 logging.basicConfig(
@@ -104,6 +104,7 @@ app.include_router(search.router)
 app.include_router(autotag.router)
 app.include_router(rag.router)
 app.include_router(difficulty.router)
+app.include_router(sync.router)
 
 # ── Root endpoint ────────────────────────────────────────────────
 @app.get("/")
@@ -119,6 +120,7 @@ async def root():
             "autotag": "POST /autotag",
             "difficulty": "POST /difficulty",
             "rag": "POST /rag",
+            "sync": "POST /sync",
             "docs":   "GET /docs",
         }
     }

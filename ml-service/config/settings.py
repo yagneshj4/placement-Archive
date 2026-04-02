@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     chroma_collection_questions: str = "questions"
 
     # Node.js backend (for health checks)
-    node_backend_url: str = "http://localhost:5000"
+    node_backend_url: str = "https://placement-archive-api.onrender.com"
 
     # Security
     api_key: str = "ml-service-dev-key"
