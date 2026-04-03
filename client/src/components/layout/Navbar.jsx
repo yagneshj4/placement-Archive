@@ -63,9 +63,13 @@ export default function Navbar() {
                 + Share
               </Link>
               <div className="flex items-center gap-3 border-l border-gray-200 pl-4">
-                <div className="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center font-bold text-xs shadow-sm">
+                <Link 
+                  to="/profile"
+                  title="My Profile"
+                  className="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center font-bold text-xs shadow-sm hover:border-gray-900 transition-all"
+                >
                   {user?.name?.charAt(0).toUpperCase()}
-                </div>
+                </Link>
                 <button onClick={handleLogout} className="text-gray-400 hover:text-gray-900 text-xs font-bold transition-colors">
                   Logout
                 </button>

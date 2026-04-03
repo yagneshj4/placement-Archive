@@ -11,6 +11,7 @@ import Bookmarks        from './pages/Bookmarks'
 import QandA            from './pages/QandA'
 import AdminAnalytics   from './pages/AdminAnalytics'
 import Unsubscribed     from './pages/Unsubscribed'
+import Profile          from './pages/Profile'
 import NotFound         from './pages/NotFound'
 import ProtectedRoute   from './components/layout/ProtectedRoute'
 import PageWrapper      from './components/layout/PageWrapper'
@@ -81,6 +82,16 @@ function App() {
             <ProtectedRoute>
               <PageWrapper>
                 <Bookmarks />
+              </PageWrapper>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <PageWrapper>
+                <Profile />
               </PageWrapper>
             </ProtectedRoute>
           }

@@ -68,7 +68,10 @@ export const updateProfile = async (req, res, next) => {
 		}
 		if (targetRole !== undefined) updates.targetRole = targetRole
 		if (name !== undefined) updates.name = String(name).trim()
-		if (graduationYear !== undefined) updates.graduationYear = Number(graduationYear)
+		if (graduationYear !== undefined && graduationYear !== '' && graduationYear !== null) {
+			const year = Number(graduationYear)
+			if (year > 0) updates.graduationYear = year
+		}
 
 		const user = await User.findByIdAndUpdate(req.user.id, updates, {
 			returnDocument: 'after',
