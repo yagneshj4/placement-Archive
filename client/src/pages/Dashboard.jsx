@@ -126,13 +126,18 @@ export default function Dashboard() {
           <h1 className="text-3xl font-black text-gray-900 tracking-tight">Placement Archive</h1>
           <p className="text-sm font-medium text-gray-500 mt-1">Discover interview patterns and placement experiences.</p>
         </div>
-        <Link
-          to="/submit"
-          className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all w-full md:w-auto justify-center"
+        <motion.div
+          whileHover={{ scale: 1.05, y: -2 }}
+          whileTap={{ scale: 0.98 }}
         >
-          <PlusCircle size={18} />
-          Share yours
-        </Link>
+          <Link
+            to="/submit"
+            className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-xl text-sm font-bold shadow-md hover:shadow-xl transition-all w-full md:w-auto justify-center"
+          >
+            <PlusCircle size={18} />
+            Share yours
+          </Link>
+        </motion.div>
       </div>
 
       {/* 2. Trending Companies Quick-Tags */}

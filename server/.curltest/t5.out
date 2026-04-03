@@ -1,1 +1,0 @@
-{"success":false,"message":"Invalid email or password","stack":"Error: Invalid email or password\n    at loginUser (file:///C:/Users/HP/OneDrive/Desktop/r2/placement-archive/server/services/auth.service.js:74:9)\n    at async login (file:///C:/Users/HP/OneDrive/Desktop/r2/placement-archive/server/controllers/auth.controller.js:32:47)"}

@@ -69,22 +69,25 @@ export default function Auth() {
 	}
 
 	return (
-		<div className="min-h-screen bg-[#0B0B0F] text-white flex items-center justify-center p-6 relative overflow-hidden selection:bg-[#F97316] selection:text-white">
+		<div className="min-h-screen bg-white text-gray-900 flex items-center justify-center p-6 relative overflow-hidden selection:bg-gray-900 selection:text-white">
 			
-			{/* BACKGROUND GLOWS */}
-			<motion.div 
-				animate={{ scale: [1, 1.2, 1], opacity: [0.05, 0.1, 0.05] }}
-				transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-				className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-[#F97316] blur-[150px] -z-10"
-			/>
-			<motion.div 
-				animate={{ scale: [1, 1.1, 1], opacity: [0.03, 0.07, 0.03] }}
-				transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-				className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[#EF4444] blur-[150px] -z-10"
+			{/* FIXED GRID BACKGROUND */}
+			<div 
+				className="fixed inset-0 z-0 pointer-events-none opacity-[0.05]"
+				style={{ backgroundImage: `linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)`, backgroundSize: '40px 40px' }}
 			/>
 
-			{/* GRID OVERLAY */}
-			<div className="absolute inset-0 bg-[linear-gradient(to_right,#F97316_1px,transparent_1px),linear-gradient(to_bottom,#F97316_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.02] -z-10" />
+			{/* BACKGROUND GLOWS */}
+			<motion.div 
+				animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
+				transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+				className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-blue-100 blur-[150px] -z-10"
+			/>
+			<motion.div 
+				animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.15, 0.1] }}
+				transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+				className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-100 blur-[150px] -z-10"
+			/>
 
 			<motion.div 
 				initial="hidden" animate="visible" variants={{
@@ -95,24 +98,24 @@ export default function Auth() {
 				{/* LOGO AREA */}
 				<motion.div variants={fadeUp} className="flex flex-col items-center mb-10">
 					<Link to="/" className="flex items-center gap-3 mb-4 group">
-						<div className="w-12 h-12 bg-[#1C0F0A] border border-[#F97316]/30 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-							<Flame className="text-[#F97316] fill-[#F97316]" size={28} />
+						<div className="w-12 h-12 bg-white border border-gray-200 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+							<Flame className="text-gray-900" size={28} />
 						</div>
 					</Link>
-					<h1 className="text-3xl font-black italic tracking-tighter uppercase mb-2">The Archive</h1>
-					<p className="text-[#A1A1AA] text-sm font-medium">Placement Intelligence Platform</p>
+					<h1 className="text-3xl font-black italic tracking-tighter uppercase mb-2 text-gray-900">The Archive</h1>
+					<p className="text-gray-500 text-sm font-medium">Placement Intelligence Platform</p>
 				</motion.div>
 
 				{/* AUTH CARD */}
 				<motion.div 
 					variants={fadeUp}
-					className="bg-[#1C0F0A] border border-[#F97316]/10 rounded-[2.5rem] p-8 md:p-10 shadow-2xl backdrop-blur-xl relative overflow-hidden"
+					className="bg-white/80 border border-gray-100 rounded-[2.5rem] p-8 md:p-10 shadow-2xl backdrop-blur-xl relative overflow-hidden"
 				>
 					{/* TOP ACCENT LINE */}
-					<div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#F97316]/40 to-transparent" />
+					<div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-blue-200 to-transparent" />
 
 					{/* MODE TOGGLE */}
-					<div className="flex bg-[#0B0B0F] p-1.5 rounded-2xl mb-8 border border-white/5">
+					<div className="flex bg-gray-100 p-1.5 rounded-2xl mb-8 border border-gray-200">
 						{['login', 'register'].map((m) => (
 							<button
 								key={m}
@@ -122,8 +125,8 @@ export default function Auth() {
 								}}
 								className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${
 									mode === m 
-										? 'bg-[#F97316] text-white shadow-lg' 
-										: 'text-[#71717A] hover:text-white'
+										? 'bg-gray-900 text-white shadow-lg' 
+										: 'text-gray-400 hover:text-gray-900'
 								}`}
 							>
 								{m === 'login' ? 'Sign In' : 'Join Us'}
@@ -140,7 +143,7 @@ export default function Auth() {
 								exit={{ height: 0, opacity: 0 }}
 								className="overflow-hidden"
 							>
-								<div className="bg-red-500/10 border border-red-200 text-red-500 text-xs font-bold rounded-xl px-4 py-3 mb-6 text-center italic">
+								<div className="bg-red-50 border border-red-200 text-red-600 text-xs font-bold rounded-xl px-4 py-3 mb-6 text-center italic">
 									{error}
 								</div>
 							</motion.div>
@@ -159,24 +162,24 @@ export default function Auth() {
 									className="space-y-5"
 								>
 									<div className="relative">
-										<User className="absolute left-4 top-1/2 -translate-y-1/2 text-[#71717A]" size={18} />
+										<User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
 										<input
 											name="name"
 											value={form.name}
 											onChange={handleChange}
 											required
 											placeholder="FULL NAME"
-											className="w-full bg-[#0B0B0F] border border-white/5 focus:border-[#F97316]/50 rounded-xl px-12 py-4 text-sm font-bold placeholder-[#3F3F46] outline-none transition-all"
+											className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-xl px-12 py-4 text-sm font-bold placeholder-gray-400 text-gray-900 outline-none transition-all shadow-inner"
 										/>
 									</div>
 									<div className="relative">
-										<School className="absolute left-4 top-1/2 -translate-y-1/2 text-[#71717A]" size={18} />
+										<School className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
 										<input
 											name="college"
 											value={form.college}
 											onChange={handleChange}
-											placeholder="COLGE / UNIVERSITY"
-											className="w-full bg-[#0B0B0F] border border-white/5 focus:border-[#F97316]/50 rounded-xl px-12 py-4 text-sm font-bold placeholder-[#3F3F46] outline-none transition-all"
+											placeholder="COLLEGE / UNIVERSITY"
+											className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-xl px-12 py-4 text-sm font-bold placeholder-gray-400 text-gray-900 outline-none transition-all shadow-inner"
 										/>
 									</div>
 								</motion.div>
@@ -184,7 +187,7 @@ export default function Auth() {
 						</AnimatePresence>
 
 						<div className="relative">
-							<Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#71717A]" size={18} />
+							<Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
 							<input
 								name="email"
 								type="email"
@@ -192,12 +195,12 @@ export default function Auth() {
 								onChange={handleChange}
 								required
 								placeholder="EMAIL ADDRESS"
-								className="w-full bg-[#0B0B0F] border border-white/5 focus:border-[#F97316]/50 rounded-xl px-12 py-4 text-sm font-bold placeholder-[#3F3F46] outline-none transition-all"
+								className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-xl px-12 py-4 text-sm font-bold placeholder-gray-400 text-gray-900 outline-none transition-all shadow-inner"
 							/>
 						</div>
 
 						<div className="relative">
-							<Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#71717A]" size={18} />
+							<Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
 							<input
 								name="password"
 								type="password"
@@ -205,14 +208,16 @@ export default function Auth() {
 								onChange={handleChange}
 								required
 								placeholder="PASSWORD"
-								className="w-full bg-[#0B0B0F] border border-white/5 focus:border-[#F97316]/50 rounded-xl px-12 py-4 text-sm font-bold placeholder-[#3F3F46] outline-none transition-all"
+								className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-xl px-12 py-4 text-sm font-bold placeholder-gray-400 text-gray-900 outline-none transition-all shadow-inner"
 							/>
 						</div>
 
-						<button
+						<motion.button
+							whileHover={{ scale: 1.02, y: -2 }}
+							whileTap={{ scale: 0.98 }}
 							type="submit"
 							disabled={loading}
-							className="w-full bg-[#F97316] text-white py-4 rounded-xl text-xs font-black uppercase tracking-[0.2em] hover:bg-[#FB923C] hover:shadow-xl hover:shadow-[#F97316]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3 mt-4"
+							className="w-full bg-gray-900 text-white py-4 rounded-xl text-xs font-black uppercase tracking-[0.2em] hover:bg-black hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3 mt-4"
 						>
 							{loading ? (
 								<div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -222,39 +227,43 @@ export default function Auth() {
 									<ArrowRight size={18} />
 								</>
 							)}
-						</button>
+						</motion.button>
 					</form>
 
 					{/* DIVIDER */}
 					<div className="relative flex items-center justify-center my-8">
 						<div className="absolute inset-0 flex items-center">
-							<div className="w-full border-t border-white/5"></div>
+							<div className="w-full border-t border-gray-100"></div>
 						</div>
 						<div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
-							<span className="px-4 bg-[#1C0F0A] text-[#71717A]">Secure Gateway</span>
+							<span className="px-4 bg-white text-gray-400">Secure Gateway</span>
 						</div>
 					</div>
 
 					{/* SOCIAL AUTH */}
-					<button
+					<motion.button
+						whileHover={{ scale: 1.02, backgroundColor: "#f9fafb" }}
+						whileTap={{ scale: 0.98 }}
 						type="button"
 						onClick={handleGoogleLogin}
 						disabled={loading}
-						className="w-full bg-white text-black py-4 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-gray-100 transition-all shadow-lg active:scale-95"
+						className="w-full bg-white text-gray-900 border border-gray-200 py-4 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all shadow-sm active:scale-95"
 					>
 						<Chrome size={18} />
 						Continue with Google
-					</button>
+					</motion.button>
 
 					<div className="mt-8 text-center">
-						<Link to="/" className="text-[#71717A] text-[10px] font-bold uppercase tracking-widest hover:text-[#F97316] transition-colors">
-							← Return to Main Archive
-						</Link>
+						<motion.div whileHover={{ x: -5 }}>
+							<Link to="/" className="text-gray-400 text-[10px] font-bold uppercase tracking-widest hover:text-gray-900 transition-colors">
+								← Return to Main Archive
+							</Link>
+						</motion.div>
 					</div>
 				</motion.div>
 
 				{/* FOOTER NOTE */}
-				<motion.p variants={fadeUp} className="text-center mt-8 text-[#71717A] text-[10px] font-bold uppercase tracking-widest italic">
+				<motion.p variants={fadeUp} className="text-center mt-8 text-gray-400 text-[10px] font-bold uppercase tracking-widest italic">
 					By entering, you agree to our collective intelligence protocols.
 				</motion.p>
 			</motion.div>

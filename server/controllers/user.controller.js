@@ -71,7 +71,7 @@ export const updateProfile = async (req, res, next) => {
 		if (graduationYear !== undefined) updates.graduationYear = Number(graduationYear)
 
 		const user = await User.findByIdAndUpdate(req.user.id, updates, {
-			new: true,
+			returnDocument: 'after',
 			runValidators: true,
 		}).select('-passwordHash')
 
