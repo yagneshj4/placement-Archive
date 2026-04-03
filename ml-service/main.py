@@ -86,6 +86,7 @@ app = FastAPI(
     lifespan=lifespan,
     docs_url="/docs",      # Swagger UI at /docs
     redoc_url="/redoc",    # ReDoc at /redoc
+    redirect_slashes=False, # FIX: Don't redirect POST /rag to GET /rag/
 )
 
 # ── CORS — allow Node.js backend to call this service ───────────

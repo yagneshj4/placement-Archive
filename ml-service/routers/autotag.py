@@ -47,7 +47,7 @@ async def verify_api_key(x_api_key: str = Header(None)):
 
 # ── Endpoints ──────────────────────────────────────────────────────
 
-@router.post("/", response_model=AutoTagResponse)
+@router.post("", response_model=AutoTagResponse)
 async def autotag_experience(
     request: AutoTagRequest,
     api_key: str = Header(None, alias="X-API-Key", description="API Key")

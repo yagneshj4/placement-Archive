@@ -12,7 +12,7 @@ from services.rag import rag_query
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/rag", tags=["rag"])
 
-@router.post("/", response_model=RAGResponse)
+@router.post("", response_model=RAGResponse)
 async def answer_question(request: RAGRequest):
     """
     Answer a placement interview question using RAG (Retrieval-Augmented Generation).

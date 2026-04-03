@@ -3,7 +3,8 @@ import logging
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from config.settings import settings
 from services.vector_store import get_collection
-from services.embedding import get_embeddings
+from services.embedding import encode_batch
+from services.vector_store import add_embeddings_batch
 
 router = APIRouter(prefix="/sync", tags=["Maintenance"])
 logger = logging.getLogger(__name__)
@@ -13,8 +14,6 @@ async def run_sync():
     try:
         NODE_URL = settings.node_backend_url or "https://placement-archive-api.onrender.com"
         logger.info(f"🔄 Starting background sync from {NODE_URL}")
-        
-        collection = get_collection()
         
         # 1. Fetch from Node.js
         async with httpx.AsyncClient(timeout=60.0) as client:
@@ -58,12 +57,12 @@ async def run_sync():
 
         # 4. Generate Embeddings
         logger.info(f"🔢 Generating embeddings for {len(texts)} items...")
-        embeddings = get_embeddings(texts)
+        embeddings = encode_batch(texts)
         
         # 5. Store in Chroma
-        collection.upsert(
-            ids=ids,
-            documents=texts,
+        add_embeddings_batch(
+            collection_name="experiences",
+            doc_ids=ids,
             embeddings=embeddings,
             metadatas=metadatas
         )
@@ -73,7 +72,7 @@ async def run_sync():
     except Exception as e:
         logger.error(f"❌ Sync failed: {str(e)}")
 
-@router.post("/")
+@router.post("")
 async def trigger_sync(background_tasks: BackgroundTasks):
     """Trigger a re-sync from MongoDB to ChromaDB"""
     background_tasks.add_task(run_sync)
