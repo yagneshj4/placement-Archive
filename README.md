@@ -8,9 +8,9 @@
   <img src="https://img.shields.io/badge/🚀%20Live%20Demo-Try%20It%20Now-ff6b6b?style=for-the-badge&labelColor=1a1a2e" />
 </a>
 &nbsp;
-<img src="https://img.shields.io/github/stars/yagnesh08/placement-archive-ml?style=for-the-badge&logo=github&color=ffd700&labelColor=1a1a2e" />
+<img src="https://img.shields.io/github/stars/yagneshj4/placement-archive?style=for-the-badge&logo=github&color=ffd700&labelColor=1a1a2e" />
 &nbsp;
-<img src="https://img.shields.io/github/forks/yagnesh08/placement-archive-ml?style=for-the-badge&logo=github&color=60a5fa&labelColor=1a1a2e" />
+<img src="https://img.shields.io/github/forks/yagneshj4/placement-archive?style=for-the-badge&logo=github&color=60a5fa&labelColor=1a1a2e" />
 &nbsp;
 <img src="https://img.shields.io/badge/PRs-Welcome-4ade80?style=for-the-badge&labelColor=1a1a2e" />
 
@@ -152,7 +152,7 @@ Track trending companies, difficulty shifts over time, and what's hot this hirin
 
 ```bash
 # 1. Clone
-git clone https://github.com/yagnesh08/placement-archive-ml.git
+git clone https://github.com/yagneshj4/placement-archive.git
 cd placement-archive-ml
 
 # 2. Backend
