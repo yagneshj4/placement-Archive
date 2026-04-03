@@ -1,15 +1,33 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../hooks/useAuth'
+import { Flame, ArrowRight, Github, Chrome, Mail, Lock, User, School } from 'lucide-react'
+
+const fadeUp = {
+	hidden: { opacity: 0, y: 20 },
+	visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+}
 
 export default function Auth() {
-	const [mode, setMode] = useState('login')   // 'login' | 'register'
+	const [searchParams] = useSearchParams()
+	const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login'
+	
+	const [mode, setMode] = useState(initialMode)   // 'login' | 'register'
 	const [form, setForm] = useState({ name: '', email: '', password: '', college: '' })
 	const [error, setError] = useState('')
 	const [loading, setLoading] = useState(false)
 
 	const { login, register, loginWithGoogle } = useAuth()
 	const navigate = useNavigate()
+
+	// Update mode if URL parameter changes
+	useEffect(() => {
+		const m = searchParams.get('mode')
+		if (m === 'register' || m === 'login') {
+			setMode(m)
+		}
+	}, [searchParams])
 
 	const handleChange = (e) => {
 		setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
@@ -27,7 +45,7 @@ export default function Auth() {
 			} else {
 				await register({ name: form.name, email: form.email, password: form.password, college: form.college })
 			}
-			navigate('/')   // redirect to dashboard on success
+			navigate('/home')   // redirect to dashboard on success
 		} catch (err) {
 			const msg = err.response?.data?.message || 'Something went wrong. Try again.'
 			setError(msg)
@@ -41,7 +59,7 @@ export default function Auth() {
 		setError('')
 		try {
 			await loginWithGoogle()
-			navigate('/')
+			navigate('/home')
 		} catch (err) {
 			const msg = err.response?.data?.message || err.message || 'Google Auth failed'
 			setError(msg)
@@ -51,146 +69,195 @@ export default function Auth() {
 	}
 
 	return (
-		<div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 relative overflow-hidden font-sans">
-			{/* Ambient Background Glows */}
-			<div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-100 rounded-full blur-[120px] pointer-events-none opacity-60" />
-			<div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-teal-50 rounded-full blur-[120px] pointer-events-none opacity-60" />
-            
-			{/* Grid pattern overlay */}
-            <div 
-                className="absolute inset-0 pointer-events-none opacity-[0.03]"
-                style={{ backgroundImage: `linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)`, backgroundSize: '40px 40px' }}
-            />
+		<div className="min-h-screen bg-[#0B0B0F] text-white flex items-center justify-center p-6 relative overflow-hidden selection:bg-[#F97316] selection:text-white">
+			
+			{/* BACKGROUND GLOWS */}
+			<motion.div 
+				animate={{ scale: [1, 1.2, 1], opacity: [0.05, 0.1, 0.05] }}
+				transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+				className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-[#F97316] blur-[150px] -z-10"
+			/>
+			<motion.div 
+				animate={{ scale: [1, 1.1, 1], opacity: [0.03, 0.07, 0.03] }}
+				transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+				className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[#EF4444] blur-[150px] -z-10"
+			/>
 
-			<div className="w-full max-w-md bg-white/80 backdrop-blur-2xl border border-gray-200 rounded-[2rem] p-8 sm:p-10 shadow-2xl relative z-10 transition-all">
-				
-				{/* Header */}
-				<div className="text-center mb-8">
-					<div className="w-12 h-12 mx-auto bg-gray-900 rounded-xl flex items-center justify-center shadow-lg mb-6">
-						<span className="text-white text-xl">◆</span>
+			{/* GRID OVERLAY */}
+			<div className="absolute inset-0 bg-[linear-gradient(to_right,#F97316_1px,transparent_1px),linear-gradient(to_bottom,#F97316_1px,transparent_1px)] bg-[size:40px_40px] opacity-[0.02] -z-10" />
+
+			<motion.div 
+				initial="hidden" animate="visible" variants={{
+					visible: { transition: { staggerChildren: 0.1 } }
+				}}
+				className="w-full max-w-md relative z-10"
+			>
+				{/* LOGO AREA */}
+				<motion.div variants={fadeUp} className="flex flex-col items-center mb-10">
+					<Link to="/" className="flex items-center gap-3 mb-4 group">
+						<div className="w-12 h-12 bg-[#1C0F0A] border border-[#F97316]/30 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+							<Flame className="text-[#F97316] fill-[#F97316]" size={28} />
+						</div>
+					</Link>
+					<h1 className="text-3xl font-black italic tracking-tighter uppercase mb-2">The Archive</h1>
+					<p className="text-[#A1A1AA] text-sm font-medium">Placement Intelligence Platform</p>
+				</motion.div>
+
+				{/* AUTH CARD */}
+				<motion.div 
+					variants={fadeUp}
+					className="bg-[#1C0F0A] border border-[#F97316]/10 rounded-[2.5rem] p-8 md:p-10 shadow-2xl backdrop-blur-xl relative overflow-hidden"
+				>
+					{/* TOP ACCENT LINE */}
+					<div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#F97316]/40 to-transparent" />
+
+					{/* MODE TOGGLE */}
+					<div className="flex bg-[#0B0B0F] p-1.5 rounded-2xl mb-8 border border-white/5">
+						{['login', 'register'].map((m) => (
+							<button
+								key={m}
+								onClick={() => {
+									setMode(m)
+									setError('')
+								}}
+								className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${
+									mode === m 
+										? 'bg-[#F97316] text-white shadow-lg' 
+										: 'text-[#71717A] hover:text-white'
+								}`}
+							>
+								{m === 'login' ? 'Sign In' : 'Join Us'}
+							</button>
+						))}
 					</div>
-					<h1 className="text-3xl font-black text-gray-900 tracking-tight leading-none mb-2">The Archive</h1>
-					<p className="text-gray-500 text-sm">
-						{mode === 'login' ? 'Welcome back. Sign in to continue.' : 'Join the most prepared candidates.'}
-					</p>
-				</div>
 
-				{/* Mode toggle */}
-				<div className="flex bg-gray-100 p-1.5 rounded-xl mb-8 border border-gray-200">
-					{['login', 'register'].map((m) => (
-						<button
-							key={m}
-							onClick={() => {
-								setMode(m)
-								setError('')
-							}}
-							className={`flex-1 py-2.5 text-sm font-semibold rounded-lg transition-all ${
-								mode === m 
-									? 'bg-white text-gray-900 shadow-sm border border-gray-200' 
-									: 'text-gray-500 hover:text-gray-700 transparent'
-							}`}
-						>
-							{m === 'login' ? 'Sign In' : 'Create Account'}
-						</button>
-					))}
-				</div>
+					{/* ERROR DISPLAY */}
+					<AnimatePresence mode="wait">
+						{error && (
+							<motion.div 
+								initial={{ height: 0, opacity: 0 }}
+								animate={{ height: 'auto', opacity: 1 }}
+								exit={{ height: 0, opacity: 0 }}
+								className="overflow-hidden"
+							>
+								<div className="bg-red-500/10 border border-red-200 text-red-500 text-xs font-bold rounded-xl px-4 py-3 mb-6 text-center italic">
+									{error}
+								</div>
+							</motion.div>
+						)}
+					</AnimatePresence>
 
-				{/* Error */}
-				{error && (
-					<div className="bg-red-50 border border-red-200 text-red-600 font-medium text-sm rounded-xl px-4 py-3 mb-6 text-center">
-						{error}
-					</div>
-				)}
+					{/* FORM */}
+					<form onSubmit={handleSubmit} className="space-y-5">
+						<AnimatePresence mode="popLayout">
+							{mode === 'register' && (
+								<motion.div
+									key="register"
+									initial={{ opacity: 0, x: -20 }}
+									animate={{ opacity: 1, x: 0 }}
+									exit={{ opacity: 0, x: 20 }}
+									className="space-y-5"
+								>
+									<div className="relative">
+										<User className="absolute left-4 top-1/2 -translate-y-1/2 text-[#71717A]" size={18} />
+										<input
+											name="name"
+											value={form.name}
+											onChange={handleChange}
+											required
+											placeholder="FULL NAME"
+											className="w-full bg-[#0B0B0F] border border-white/5 focus:border-[#F97316]/50 rounded-xl px-12 py-4 text-sm font-bold placeholder-[#3F3F46] outline-none transition-all"
+										/>
+									</div>
+									<div className="relative">
+										<School className="absolute left-4 top-1/2 -translate-y-1/2 text-[#71717A]" size={18} />
+										<input
+											name="college"
+											value={form.college}
+											onChange={handleChange}
+											placeholder="COLGE / UNIVERSITY"
+											className="w-full bg-[#0B0B0F] border border-white/5 focus:border-[#F97316]/50 rounded-xl px-12 py-4 text-sm font-bold placeholder-[#3F3F46] outline-none transition-all"
+										/>
+									</div>
+								</motion.div>
+							)}
+						</AnimatePresence>
 
-				{/* Form */}
-				<form onSubmit={handleSubmit} className="space-y-4">
-					{mode === 'register' && (
-						<div>
-							<label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Full Name</label>
+						<div className="relative">
+							<Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#71717A]" size={18} />
 							<input
-								name="name"
-								value={form.name}
+								name="email"
+								type="email"
+								value={form.email}
 								onChange={handleChange}
 								required
-								placeholder="Yagnesh Kumar"
-								className="w-full bg-white border border-gray-300 text-gray-900 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 placeholder-gray-400 transition-colors shadow-sm"
+								placeholder="EMAIL ADDRESS"
+								className="w-full bg-[#0B0B0F] border border-white/5 focus:border-[#F97316]/50 rounded-xl px-12 py-4 text-sm font-bold placeholder-[#3F3F46] outline-none transition-all"
 							/>
 						</div>
-					)}
 
-					<div>
-						<label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Email Address</label>
-						<input
-							name="email"
-							type="email"
-							value={form.email}
-							onChange={handleChange}
-							required
-							placeholder="you@vrsec.ac.in"
-							className="w-full bg-white border border-gray-300 text-gray-900 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 placeholder-gray-400 transition-colors shadow-sm"
-						/>
-					</div>
-
-					<div>
-						<label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">Password</label>
-						<input
-							name="password"
-							type="password"
-							value={form.password}
-							onChange={handleChange}
-							required
-							placeholder="••••••••"
-							className="w-full bg-white border border-gray-300 text-gray-900 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 placeholder-gray-400 transition-colors shadow-sm"
-						/>
-					</div>
-
-					{mode === 'register' && (
-						<div>
-							<label className="block text-sm font-bold text-gray-700 mb-1.5 ml-1">College</label>
+						<div className="relative">
+							<Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#71717A]" size={18} />
 							<input
-								name="college"
-								value={form.college}
+								name="password"
+								type="password"
+								value={form.password}
 								onChange={handleChange}
-								placeholder="VR Siddhartha Engineering College"
-								className="w-full bg-white border border-gray-300 text-gray-900 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 placeholder-gray-400 transition-colors shadow-sm"
+								required
+								placeholder="PASSWORD"
+								className="w-full bg-[#0B0B0F] border border-white/5 focus:border-[#F97316]/50 rounded-xl px-12 py-4 text-sm font-bold placeholder-[#3F3F46] outline-none transition-all"
 							/>
 						</div>
-					)}
 
+						<button
+							type="submit"
+							disabled={loading}
+							className="w-full bg-[#F97316] text-white py-4 rounded-xl text-xs font-black uppercase tracking-[0.2em] hover:bg-[#FB923C] hover:shadow-xl hover:shadow-[#F97316]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-3 mt-4"
+						>
+							{loading ? (
+								<div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+							) : (
+								<>
+									{mode === 'login' ? 'Establish Access' : 'Create Identity'}
+									<ArrowRight size={18} />
+								</>
+							)}
+						</button>
+					</form>
+
+					{/* DIVIDER */}
+					<div className="relative flex items-center justify-center my-8">
+						<div className="absolute inset-0 flex items-center">
+							<div className="w-full border-t border-white/5"></div>
+						</div>
+						<div className="relative flex justify-center text-[10px] font-black uppercase tracking-widest">
+							<span className="px-4 bg-[#1C0F0A] text-[#71717A]">Secure Gateway</span>
+						</div>
+					</div>
+
+					{/* SOCIAL AUTH */}
 					<button
-						type="submit"
+						type="button"
+						onClick={handleGoogleLogin}
 						disabled={loading}
-						className="w-full bg-gray-900 text-white py-4 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-gray-800 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-6"
+						className="w-full bg-white text-black py-4 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-gray-100 transition-all shadow-lg active:scale-95"
 					>
-						{loading ? 'Authenticating...' : (mode === 'login' ? 'Enter Archive' : 'Establish Access')}
+						<Chrome size={18} />
+						Continue with Google
 					</button>
-				</form>
 
-				<div className="relative flex items-center justify-center mt-6 mb-6">
-					<div className="absolute inset-0 flex items-center">
-						<div className="w-full border-t border-gray-200"></div>
+					<div className="mt-8 text-center">
+						<Link to="/" className="text-[#71717A] text-[10px] font-bold uppercase tracking-widest hover:text-[#F97316] transition-colors">
+							← Return to Main Archive
+						</Link>
 					</div>
-					<div className="relative flex justify-center text-sm">
-						<span className="px-3 bg-white text-gray-400 font-bold text-xs uppercase tracking-widest">Or</span>
-					</div>
-				</div>
+				</motion.div>
 
-				<button
-					type="button"
-					onClick={handleGoogleLogin}
-					disabled={loading}
-					className="w-full bg-white border border-gray-200 text-gray-900 py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-3 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-				>
-					<svg className="w-5 h-5" viewBox="0 0 24 24">
-						<path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-						<path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-						<path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-						<path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-					</svg>
-					Continue with Google
-				</button>
-
-			</div>
+				{/* FOOTER NOTE */}
+				<motion.p variants={fadeUp} className="text-center mt-8 text-[#71717A] text-[10px] font-bold uppercase tracking-widest italic">
+					By entering, you agree to our collective intelligence protocols.
+				</motion.p>
+			</motion.div>
 		</div>
 	)
 }

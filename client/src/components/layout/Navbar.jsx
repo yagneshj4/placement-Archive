@@ -29,40 +29,56 @@ export default function Navbar() {
 
         {/* Nav links */}
         <div className="flex items-center gap-8 text-sm font-semibold">
-          <Link to="/home" className={isActive('/home')}>Experiences</Link>
-          <Link to="/dashboard" className={isActive('/dashboard')}>My Prep</Link>
-          <Link to="/search" className={isActive('/search')}>Search</Link>
-          <Link to="/qa" className={isActive('/qa')}>Ask AI</Link>
+          {user ? (
+            <>
+              <Link to="/home" className={isActive('/home')}>Experiences</Link>
+              <Link to="/dashboard" className={isActive('/dashboard')}>My Prep</Link>
+              <Link to="/search" className={isActive('/search')}>Search</Link>
+              <Link to="/qa" className={isActive('/qa')}>Ask AI</Link>
 
-          {/* Bookmarks with count badge */}
-          <Link to="/bookmarks" className={`relative ${isActive('/bookmarks')}`}>
-            Saved
-            {bookmarkCount > 0 && (
-              <span className="absolute -top-1.5 -right-3.5 bg-gray-900 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
-                {bookmarkCount > 9 ? '9+' : bookmarkCount}
-              </span>
-            )}
-          </Link>
+              <Link to="/bookmarks" className={`relative ${isActive('/bookmarks')}`}>
+                Saved
+                {bookmarkCount > 0 && (
+                  <span className="absolute -top-1.5 -right-3.5 bg-gray-900 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
+                    {bookmarkCount > 9 ? '9+' : bookmarkCount}
+                  </span>
+                )}
+              </Link>
 
-          {isAdmin && <Link to="/admin" className={isActive('/admin')}>Admin</Link>}
+              {isAdmin && <Link to="/admin" className={isActive('/admin')}>Admin</Link>}
+            </>
+          ) : (
+            <p className="text-gray-400 font-medium italic">Placement Archive Hub</p>
+          )}
         </div>
 
         {/* Right side */}
         <div className="flex items-center gap-4">
-          <Link
-            to="/submit"
-            className="px-4 py-1.5 bg-gray-900 text-white rounded-lg text-sm font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-center"
-          >
-            + Share
-          </Link>
-          <div className="flex items-center gap-3 border-l border-gray-200 pl-4">
-            <div className="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center font-bold text-xs shadow-sm">
-              {user?.name?.charAt(0).toUpperCase()}
-            </div>
-            <button onClick={handleLogout} className="text-gray-400 hover:text-gray-900 text-xs font-bold transition-colors">
-              Logout
-            </button>
-          </div>
+          {user ? (
+            <>
+              <Link
+                to="/submit"
+                className="px-4 py-1.5 bg-gray-900 text-white rounded-lg text-sm font-bold hover:shadow-lg hover:-translate-y-0.5 transition-all text-center"
+              >
+                + Share
+              </Link>
+              <div className="flex items-center gap-3 border-l border-gray-200 pl-4">
+                <div className="w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center font-bold text-xs shadow-sm">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </div>
+                <button onClick={handleLogout} className="text-gray-400 hover:text-gray-900 text-xs font-bold transition-colors">
+                  Logout
+                </button>
+              </div>
+            </>
+          ) : (
+            <Link 
+              to="/auth" 
+              className="px-6 py-2 bg-gray-900 text-white rounded-full text-sm font-bold hover:shadow-lg transition-all"
+            >
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
     </nav>

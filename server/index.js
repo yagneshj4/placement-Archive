@@ -95,24 +95,7 @@ connectDB()
 			console.log(`🔥 Health:      http://localhost:${PORT}/health`)
 			console.log(`📡 Environment: ${process.env.NODE_ENV}\n`)
 
-			emailQueue
-				.add(
-					'dispatch-weekly-digests',
-					{},
-					{
-						repeat: {
-							cron: '0 8 * * 0',
-							tz: 'Asia/Kolkata',
-						},
-						jobId: 'weekly-digest-cron',
-					},
-				)
-				.then(() => {
-					console.log('📅 Weekly digest cron registered (Sunday 8am IST)')
-				})
-				.catch((err) => {
-					console.warn(`⚠️  Weekly digest cron not registered: ${err.message}`)
-				})
+
 		})
 	})
 	.catch((err) => {
