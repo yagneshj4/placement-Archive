@@ -100,16 +100,7 @@ Track trending companies, difficulty shifts over time, and what's hot this hirin
 </div>
 
 <div align="center">
-<img src="https://via.placeholder.com/850x480/0f0f1a/60a5fa?text=📸+Add+Your+App+Screenshot+Here" width="85%" style="border-radius:12px; border: 1px solid #2d2d4e"/>
-<br/><i>The Semantic Search dashboard — ask questions, get answers from your peers.</i>
-</div>
-
-<br/>
-
-<div align="center">
-<img src="https://via.placeholder.com/420x260/0f0f1a/4ade80?text=Gap+Analysis" width="41%" />
-&nbsp;&nbsp;
-<img src="https://via.placeholder.com/420x260/0f0f1a/f472b6?text=Experience+Feed" width="41%" />
+<i>Screenshots coming soon — try the live app above to see it in action!</i>
 </div>
 
 ---
@@ -152,8 +143,8 @@ Track trending companies, difficulty shifts over time, and what's hot this hirin
 
 ```bash
 # 1. Clone
-git clone https://github.com/yagneshj4/placement-archive.git
-cd placement-archive-ml
+git clone https://github.com/yagneshj4/placement-Archive.git
+cd placement-Archive
 
 # 2. Backend
 cd server
@@ -183,20 +174,28 @@ docker-compose up --build
 ## 📂 Project Structure
 
 ```
-placement-archive-ml/
+placement-Archive/
 ├── client/               # React 18 + Vite frontend
 │   └── src/
 │       ├── components/   # UI components
 │       ├── pages/        # Route pages
-│       └── hooks/        # Custom React hooks
+│       ├── hooks/        # Custom React hooks (useAuth, useSearch, …)
+│       ├── context/      # React context providers
+│       └── api/          # API client helpers
 ├── server/               # Node.js + Express API
-│   ├── routes/
+│   ├── routes/           # Express route definitions
+│   ├── controllers/      # Request handlers
 │   ├── models/           # Mongoose schemas
-│   └── workers/          # Redis Bull queue workers
+│   ├── middleware/       # Auth, error handling
+│   ├── queues/           # Redis Bull queue setup
+│   ├── workers/          # Embedding, email & retraining workers
+│   ├── services/         # Business logic layer
+│   └── utils/            # Shared utilities
 └── ml-service/           # FastAPI intelligence layer
-    ├── embeddings/        # FAISS index + MiniLM
-    ├── gap_analysis/      # XGBoost gap model
-    └── ner/               # DistilBERT extraction
+    ├── routers/          # API route handlers (search, rag, autotag, …)
+    ├── services/         # Embedding, vector store, tagger, difficulty
+    ├── models/           # XGBoost difficulty model + schemas
+    └── config/           # Settings and configuration
 ```
 
 ---
@@ -248,7 +247,7 @@ If this project helped you crack an interview, land an offer, or just made your 
 
 <div align="center">
 
-<a href="https://github.com/yagnesh08/placement-archive-ml">
+<a href="https://github.com/yagneshj4/placement-Archive">
   <img src="https://img.shields.io/badge/⭐_Give_a_Star-It_helps_students-ffd700?style=for-the-badge&logo=github&labelColor=1a1a2e" />
 </a>
 
@@ -256,6 +255,6 @@ If this project helped you crack an interview, land an offer, or just made your 
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=100&section=footer" width="100%"/>
 
-<sub>Built by <a href="https://github.com/yagnesh08">Yagnesh</a> · For engineers, by an engineer · MIT License</sub>
+<sub>Built by <a href="https://github.com/yagneshj4">Yagnesh</a> · For engineers, by an engineer · MIT License</sub>
 
 </div>
