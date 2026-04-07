@@ -152,104 +152,129 @@ export default function QandA() {
         {answer && !loading && (
           <div className="max-w-3xl mx-auto mb-12">
             
-            {/* Answer card */}
-            <div className="bg-white border border-gray-200 rounded-[1.5rem] p-8 mb-6 shadow-xl relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-1.5 h-full bg-gray-900" />
-              
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center shadow-md">
-                   <span className="text-white text-xs">◆</span>
+            {sources.length === 0 ? (
+              <div className="text-center py-16 bg-white border border-gray-100 rounded-[2rem] shadow-sm mb-6">
+                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-5 border border-gray-100">
+                  <Search className="w-6 h-6 text-gray-400" strokeWidth={3} />
                 </div>
-                <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">AI Synthesis</h2>
+                <h3 className="text-gray-900 font-black text-xl mb-3 tracking-tight">No Matches Found</h3>
+                <p className="text-gray-500 font-medium text-[15px] max-w-md mx-auto leading-relaxed px-4">{answer}</p>
+                <div className="mt-8 flex justify-center gap-3">
+                  <button
+                    onClick={() => {
+                      setQuery('')
+                      setAnswer(null)
+                      setSources([])
+                    }}
+                    className="text-[11px] uppercase tracking-widest font-black px-6 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-all shadow-md hover:-translate-y-[1px]"
+                  >
+                    Try Another Search
+                  </button>
+                </div>
               </div>
-              
-              <div className="prose prose-gray max-w-none mb-6 text-[15px] leading-[1.8]
-                [&_h3]:text-[16px] [&_h3]:font-extrabold [&_h3]:text-gray-900 [&_h3]:mt-6 [&_h3]:mb-3 [&_h3]:tracking-tight
-                [&_strong]:font-extrabold [&_strong]:text-gray-900
-                [&_em]:text-gray-600 [&_em]:not-italic [&_em]:font-medium
-                [&_p]:text-gray-700 [&_p]:font-medium [&_p]:mb-3
-                [&_blockquote]:border-l-4 [&_blockquote]:border-teal-400 [&_blockquote]:bg-teal-50/50 [&_blockquote]:pl-4 [&_blockquote]:py-2 [&_blockquote]:pr-3 [&_blockquote]:rounded-r-xl [&_blockquote]:my-2 [&_blockquote]:text-gray-700 [&_blockquote]:italic [&_blockquote]:text-[14px]
-                [&_ul]:space-y-1.5 [&_ul]:my-2
-                [&_li]:text-gray-700 [&_li]:font-medium [&_li]:text-[14px]
-                [&_code]:bg-gray-100 [&_code]:text-teal-700 [&_code]:px-2 [&_code]:py-0.5 [&_code]:rounded-md [&_code]:text-[13px] [&_code]:font-bold [&_code]:border [&_code]:border-gray-200
-              ">
-                <ReactMarkdown>{answer}</ReactMarkdown>
-              </div>
-              
-              <div className="flex items-center justify-between pt-5 border-t border-gray-100">
-                {sources.length > 0 && (
-                  <p className="text-[11px] font-black uppercase tracking-widest text-gray-500">
-                    Grounded in {sources.length} student experience{sources.length !== 1 ? 's' : ''}
-                  </p>
-                )}
+            ) : (
+              <>
+                {/* Answer card */}
+                <div className="bg-white border border-gray-200 rounded-[1.5rem] p-8 mb-6 shadow-xl relative overflow-hidden group">
+                  <div className="absolute top-0 left-0 w-1.5 h-full bg-gray-900" />
+                  
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center shadow-md">
+                      <span className="text-white text-xs">◆</span>
+                    </div>
+                    <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">AI Synthesis</h2>
+                  </div>
+                  
+                  <div className="prose prose-gray max-w-none mb-6 text-[15px] leading-[1.8]
+                    [&_h3]:text-[16px] [&_h3]:font-extrabold [&_h3]:text-gray-900 [&_h3]:mt-6 [&_h3]:mb-3 [&_h3]:tracking-tight
+                    [&_strong]:font-extrabold [&_strong]:text-gray-900
+                    [&_em]:text-gray-600 [&_em]:not-italic [&_em]:font-medium
+                    [&_p]:text-gray-700 [&_p]:font-medium [&_p]:mb-3
+                    [&_blockquote]:border-l-4 [&_blockquote]:border-teal-400 [&_blockquote]:bg-teal-50/50 [&_blockquote]:pl-4 [&_blockquote]:py-2 [&_blockquote]:pr-3 [&_blockquote]:rounded-r-xl [&_blockquote]:my-2 [&_blockquote]:text-gray-700 [&_blockquote]:italic [&_blockquote]:text-[14px]
+                    [&_ul]:space-y-1.5 [&_ul]:my-2
+                    [&_li]:text-gray-700 [&_li]:font-medium [&_li]:text-[14px]
+                    [&_code]:bg-gray-100 [&_code]:text-teal-700 [&_code]:px-2 [&_code]:py-0.5 [&_code]:rounded-md [&_code]:text-[13px] [&_code]:font-bold [&_code]:border [&_code]:border-gray-200
+                  ">
+                    <ReactMarkdown>{answer}</ReactMarkdown>
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-5 border-t border-gray-100">
+                    {sources.length > 0 && (
+                      <p className="text-[11px] font-black uppercase tracking-widest text-gray-500">
+                        Grounded in {sources.length} student experience{sources.length !== 1 ? 's' : ''}
+                      </p>
+                    )}
 
-                {/* Timing info */}
-                {timing && (
-                  <div className="flex gap-4 text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                    {timing.cached ? (
-                      <div className="flex items-center gap-1.5 text-teal-600 bg-teal-50 px-2.5 py-1 rounded border border-teal-100">
-                        <CheckCircle className="w-3.5 h-3.5" strokeWidth={3} />
-                        <span>Cached 0ms</span>
+                    {/* Timing info */}
+                    {timing && (
+                      <div className="flex gap-4 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                        {timing.cached ? (
+                          <div className="flex items-center gap-1.5 text-teal-600 bg-teal-50 px-2.5 py-1 rounded border border-teal-100">
+                            <CheckCircle className="w-3.5 h-3.5" strokeWidth={3} />
+                            <span>Cached 0ms</span>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded border border-gray-100">
+                              <Search className="w-3.5 h-3.5" />
+                              <span>RAG: {timing.retrieval_ms}ms</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded border border-gray-100">
+                              <Clock className="w-3.5 h-3.5" />
+                              <span>LLM: {timing.llm_ms}ms</span>
+                            </div>
+                          </>
+                        )}
                       </div>
-                    ) : (
-                      <>
-                        <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded border border-gray-100">
-                          <Search className="w-3.5 h-3.5" />
-                          <span>RAG: {timing.retrieval_ms}ms</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded border border-gray-100">
-                          <Clock className="w-3.5 h-3.5" />
-                          <span>LLM: {timing.llm_ms}ms</span>
-                        </div>
-                      </>
                     )}
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* Sources */}
-            {sources.length > 0 && (
-              <div className="mb-10">
-                <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4 ml-1">Verified Sources</h3>
-                <div className="space-y-3">
-                  {sources.map((source, i) => (
-                    <div key={i} className="bg-white border border-gray-200 hover:border-gray-300 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
-                      <div className="flex items-start justify-between gap-4 mb-3">
-                        <div>
-                          <p className="font-extrabold text-[13px] text-gray-900 leading-snug">{source.citation}</p>
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-teal-600 mt-2">
-                            {Math.round(source.similarity * 100)}% Match Relevance
-                          </p>
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          {source.company && (
-                            <span className="inline-block px-3 py-1 bg-gray-900 text-white text-[10px] uppercase tracking-widest rounded-md font-black shadow-sm">
-                              {source.company}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-3 mt-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                        {source.role && (
-                          <p className="bg-gray-50 px-3 py-1 rounded shadow-inner border border-gray-100">
-                            Role: <span className="text-gray-900">{source.role}</span>
-                          </p>
-                        )}
-                        {source.roundType && (
-                          <p className="bg-gray-50 px-3 py-1 rounded shadow-inner border border-gray-100">
-                            Round: <span className="text-gray-900">{source.roundType.replace(/_/g, ' ')}</span>
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
                 </div>
-              </div>
+
+                {/* Sources */}
+                {sources.length > 0 && (
+                  <div className="mb-10">
+                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4 ml-1">Verified Sources</h3>
+                    <div className="space-y-3">
+                      {sources.map((source, i) => (
+                        <div key={i} className="bg-white border border-gray-200 hover:border-gray-300 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+                          <div className="flex items-start justify-between gap-4 mb-3">
+                            <div>
+                              <p className="font-extrabold text-[13px] text-gray-900 leading-snug">{source.citation}</p>
+                              <p className="text-[11px] font-bold uppercase tracking-wider text-teal-600 mt-2">
+                                {Math.round(source.similarity * 100)}% Match Relevance
+                              </p>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              {source.company && (
+                                <span className="inline-block px-3 py-1 bg-gray-900 text-white text-[10px] uppercase tracking-widest rounded-md font-black shadow-sm">
+                                  {source.company}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3 mt-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                            {source.role && (
+                              <p className="bg-gray-50 px-3 py-1 rounded shadow-inner border border-gray-100">
+                                Role: <span className="text-gray-900">{source.role}</span>
+                              </p>
+                            )}
+                            {source.roundType && (
+                              <p className="bg-gray-50 px-3 py-1 rounded shadow-inner border border-gray-100">
+                                Round: <span className="text-gray-900">{source.roundType.replace(/_/g, ' ')}</span>
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {/* New question button */}
+
             <div className="text-center">
               <button
                 onClick={() => {
