@@ -43,7 +43,7 @@ export default function QandA() {
         setAnswer(response.data.data.answer)
         setSources(response.data.data.sources || [])
         setTiming(response.data.data.timing || {})
-        
+
         // Add to history
         setHistory(prev => [{
           id: Date.now(),
@@ -151,7 +151,7 @@ export default function QandA() {
         {/* Answer section */}
         {answer && !loading && (
           <div className="max-w-3xl mx-auto mb-12">
-            
+
             {sources.length === 0 ? (
               <div className="text-center py-16 bg-white border border-gray-100 rounded-[2rem] shadow-sm mb-6">
                 <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-5 border border-gray-100">
@@ -177,14 +177,14 @@ export default function QandA() {
                 {/* Answer card */}
                 <div className="bg-white border border-gray-200 rounded-[1.5rem] p-8 mb-6 shadow-xl relative overflow-hidden group">
                   <div className="absolute top-0 left-0 w-1.5 h-full bg-gray-900" />
-                  
+
                   <div className="flex items-center gap-2 mb-6">
                     <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center shadow-md">
                       <span className="text-white text-xs">◆</span>
                     </div>
                     <h2 className="text-sm font-black uppercase tracking-widest text-gray-900">AI Synthesis</h2>
                   </div>
-                  
+
                   <div className="prose prose-gray max-w-none mb-6 text-[15px] leading-[1.8]
                     [&_h3]:text-[16px] [&_h3]:font-extrabold [&_h3]:text-gray-900 [&_h3]:mt-6 [&_h3]:mb-3 [&_h3]:tracking-tight
                     [&_strong]:font-extrabold [&_strong]:text-gray-900
@@ -197,7 +197,7 @@ export default function QandA() {
                   ">
                     <ReactMarkdown>{answer}</ReactMarkdown>
                   </div>
-                  
+
                   <div className="flex items-center justify-between pt-5 border-t border-gray-100">
                     {sources.length > 0 && (
                       <p className="text-[11px] font-black uppercase tracking-widest text-gray-500">
@@ -252,7 +252,7 @@ export default function QandA() {
                               )}
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center gap-3 mt-4 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                             {source.role && (
                               <p className="bg-gray-50 px-3 py-1 rounded shadow-inner border border-gray-100">
