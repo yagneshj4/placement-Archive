@@ -6,14 +6,16 @@ import {
 	updateExperience,
 	deleteExperience,
 	bookmarkExperience,
+	getEmbeddingStatus,
+	recoverFailedEmbeddings,
 } from '../controllers/experience.controller.js'
-import { getEmbeddingStatus } from '../controllers/queue.controller.js'
-import { optionalAuth, protect } from '../middleware/auth.middleware.js'
+import { optionalAuth, protect, restrictTo } from '../middleware/auth.middleware.js'
 import { validate, createExperienceSchema, updateExperienceSchema } from '../middleware/validate.middleware.js'
 
 const router = Router()
 
 router.get('/', optionalAuth, getExperiences)
+router.post('/recover', protect, restrictTo('admin'), recoverFailedEmbeddings)
 router.get('/:id', optionalAuth, getExperienceById)
 router.get('/:id/status', protect, getEmbeddingStatus)
 router.post('/', protect, validate(createExperienceSchema), createExperience)
@@ -22,3 +24,4 @@ router.delete('/:id', protect, deleteExperience)
 router.put('/:id/bookmark', protect, bookmarkExperience)
 
 export default router
+

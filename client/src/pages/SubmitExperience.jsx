@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { experiencesApi } from '../api/experiences'
+import { experiencesApi } from '../api/api.js'
 import {
   Building2, Briefcase, Calendar, Layers, IndianRupee, Trophy,
   FileText, Lightbulb, ChevronRight, ChevronLeft, Check, Sparkles,

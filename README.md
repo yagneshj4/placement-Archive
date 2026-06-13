@@ -223,7 +223,7 @@ python training/generate_training_data.py
 python training/train_difficulty.py
 
 # Start FastAPI
-uvicorn main:app --reload --port 8001
+uvicorn main:app --reload --port 8000
 ```
 
 **Expected output:**
@@ -232,7 +232,7 @@ uvicorn main:app --reload --port 8001
 ✅ ChromaDB ready (experiences: 0, questions: 0)
 ✅ Auto-tagging classifiers loaded
 ✅ Difficulty model ready (XGBoost, CV accuracy: 0.855)
-🚀 ML Service ready on port 8001
+🚀 ML Service ready on port 8000
 ```
 
 > ⚠️ **Common error:** `ModuleNotFoundError: No module named 'sentence_transformers'`

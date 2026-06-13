@@ -1,7 +1,8 @@
-import { Experience } from '../models/index.js'
+import { Experience, User, AnalyticsEvent } from '../models/index.js'
 import { addEmbeddingJob, addAutoTagJob } from '../queues/index.js'
 import { sendSuccess, sendError } from '../utils/apiResponse.js'
 import { AppError } from '../middleware/error.middleware.js'
+import { sanitizeText } from '../utils/sanitizer.js'
 
 // GET /api/experiences
 export const getExperiences = async (req, res, next) => {
@@ -57,7 +58,6 @@ export const getExperienceById = async (req, res, next) => {
 
 		// Log user view event when a logged-in user opens an experience
 		if (req.user?.id) {
-			const { AnalyticsEvent } = await import('../models/index.js')
 			AnalyticsEvent.create({
 				userId: req.user.id,
 				eventType: 'experience_view',
@@ -94,13 +94,13 @@ export const createExperience = async (req, res, next) => {
 
 		// 1. Save the experience to MongoDB immediately
 		const experience = await Experience.create({
-			company: company.trim(),
-			role: role.trim(),
+			company: sanitizeText(company),
+			role: sanitizeText(role),
 			year: Number(year),
 			roundType,
-			narrative: narrative.trim(),
-			preparationTips: preparationTips?.trim() || '',
-			ctcOffered: ctcOffered || '',
+			narrative: sanitizeText(narrative),
+			preparationTips: sanitizeText(preparationTips || ''),
+			ctcOffered: sanitizeText(ctcOffered || ''),
 			offerReceived: offerReceived ?? null,
 			submittedBy: req.user.id,
 			embeddingStatus: 'pending', // starts as pending
@@ -112,7 +112,6 @@ export const createExperience = async (req, res, next) => {
 
 		// 3. Increment contributor count
 		// (fire and forget — don't await)
-		const { User } = await import('../models/index.js')
 		User.findByIdAndUpdate(req.user.id, { $inc: { contributionCount: 1 } })
 			.catch(() => {})
 
@@ -146,9 +145,30 @@ export const updateExperience = async (req, res, next) => {
 			throw new AppError('Not authorised to update this experience', 403)
 		}
 
+		const {
+			company,
+			role,
+			year,
+			roundType,
+			narrative,
+			preparationTips,
+			ctcOffered,
+			offerReceived,
+		} = req.body
+
+		const updateData = {}
+		if (company !== undefined) updateData.company = sanitizeText(company)
+		if (role !== undefined) updateData.role = sanitizeText(role)
+		if (year !== undefined) updateData.year = Number(year)
+		if (roundType !== undefined) updateData.roundType = roundType
+		if (narrative !== undefined) updateData.narrative = sanitizeText(narrative)
+		if (preparationTips !== undefined) updateData.preparationTips = sanitizeText(preparationTips)
+		if (ctcOffered !== undefined) updateData.ctcOffered = sanitizeText(ctcOffered)
+		if (offerReceived !== undefined) updateData.offerReceived = offerReceived
+
 		const updated = await Experience.findByIdAndUpdate(
 			req.params.id,
-			{ ...req.body, embeddingStatus: 'pending' }, // re-queue embedding
+			{ ...updateData, embeddingStatus: 'pending' }, // re-queue embedding
 			{ new: true, runValidators: true },
 		)
 
@@ -184,7 +204,6 @@ export const deleteExperience = async (req, res, next) => {
 // PUT /api/experiences/:id/bookmark
 export const bookmarkExperience = async (req, res, next) => {
 	try {
-		const { User } = await import('../models/index.js')
 		const user = await User.findById(req.user.id)
 		const expId = req.params.id
 
@@ -204,6 +223,90 @@ export const bookmarkExperience = async (req, res, next) => {
 				bookmarkCount: user.bookmarks.length,
 			},
 			isBookmarked ? 'Bookmark removed' : 'Bookmarked successfully',
+		)
+	} catch (err) {
+		next(err)
+	}
+}
+
+// GET /api/experiences/:id/status
+// Returns the current embedding status of an experience
+export const getEmbeddingStatus = async (req, res, next) => {
+	try {
+		const experience = await Experience.findById(req.params.id)
+			.select(
+				'embeddingStatus embeddingId extractedTags company role year',
+			)
+
+		if (!experience) throw new AppError('Experience not found', 404)
+
+		const statusMessages = {
+			pending: 'Queued for AI processing',
+			processing: 'AI is analysing and embedding your experience',
+			done: 'AI processing complete — experience is fully searchable',
+			failed: 'AI processing failed — will be retried automatically',
+		}
+
+		sendSuccess(
+			res,
+			{
+				experienceId: experience._id,
+				status: experience.embeddingStatus,
+				message: statusMessages[experience.embeddingStatus],
+				isSearchable: experience.embeddingStatus === 'done',
+				extractedTags:
+					experience.embeddingStatus === 'done'
+						? experience.extractedTags
+						: null,
+			},
+			'Status fetched',
+		)
+	} catch (err) {
+		next(err)
+	}
+}
+
+// POST /api/experiences/recover
+export const recoverFailedEmbeddings = async (req, res, next) => {
+	try {
+		// Find all experiences where either embeddingStatus or taggingStatus is 'failed'
+		const failedExperiences = await Experience.find({
+			$or: [
+				{ embeddingStatus: 'failed' },
+				{ taggingStatus: 'failed' },
+			],
+		})
+
+		let reembeddedCount = 0
+		let retaggedCount = 0
+
+		for (const exp of failedExperiences) {
+			let updated = false
+			if (exp.embeddingStatus === 'failed') {
+				exp.embeddingStatus = 'pending'
+				await addEmbeddingJob(exp._id, exp.narrative)
+				reembeddedCount++
+				updated = true
+			}
+			if (exp.taggingStatus === 'failed') {
+				exp.taggingStatus = 'pending'
+				await addAutoTagJob(exp._id, exp.narrative)
+				retaggedCount++
+				updated = true
+			}
+			if (updated) {
+				await exp.save()
+			}
+		}
+
+		sendSuccess(
+			res,
+			{
+				processed: failedExperiences.length,
+				reembeddedCount,
+				retaggedCount,
+			},
+			`Failed embedding recovery run complete. Re-queued ${reembeddedCount} embeddings and ${retaggedCount} taggings.`,
 		)
 	} catch (err) {
 		next(err)

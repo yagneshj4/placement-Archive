@@ -3,9 +3,9 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Building2, Users, FileText, PlusCircle, Frown } from 'lucide-react'
-import { experiencesApi } from '../api/experiences'
-import ExperienceCard from '../components/ui/ExperienceCard'
-import { PageSkeleton } from '../components/ui/LoadingSkeleton'
+import { experiencesApi } from '../api/api.js'
+import { ExperienceCard } from '../components/FeatureComponents'
+import { PageSkeleton } from '../components/CommonUI'
 
 const ROUND_TYPES = [
   { value: '', label: 'All rounds' },

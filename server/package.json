@@ -34,7 +34,6 @@
   "dependencies": {
     "@bull-board/api": "^6.20.5",
     "@bull-board/express": "^6.20.5",
-    "@upstash/redis": "^1.37.0",
     "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",
     "bull": "^4.16.5",
@@ -49,7 +48,6 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.3.1",
     "morgan": "^1.10.1",
-    "nodemailer": "^8.0.3",
     "redis": "^5.11.0"
   },
   "devDependencies": {

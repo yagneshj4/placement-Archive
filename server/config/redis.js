@@ -4,7 +4,17 @@ let client = null
 
 export const connectRedis = async () => {
   try {
-    client = createClient({ url: process.env.REDIS_URL })
+    client = createClient({
+      url: process.env.REDIS_URL,
+      socket: {
+        reconnectStrategy: (retries) => {
+          if (retries > 2) {
+            return new Error('Redis connection failed');
+          }
+          return 1000; // retry after 1s
+        }
+      }
+    })
 
     client.on('error', (err) => {
       console.error('Redis error:', err.message)

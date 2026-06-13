@@ -133,41 +133,4 @@ class HybridSearchResponse(BaseModel):
     results: List[SearchResult]   # reuse SearchResult from Phase 3
     total: int
     search_type: str              # "semantic" or "fallback_empty_collection"
-
-# ── Difficulty prediction ─────────────────────────────────────────
-
-class DifficultyRequest(BaseModel):
-    # High-level inputs (company, topics, roundType as strings)
-    company:    str = Field(default="", description="Company name e.g. 'Amazon'")
-    round_type: str = Field(default="technical", description="Round type")
-    topics:     List[str] = Field(default=[], description="Topic tags from extractedTags")
-
-    # Engagement signals — defaults represent a baseline user
-    skip_rate:             float = Field(default=0.2, ge=0.0, le=1.0)
-    avg_time_seconds:      float = Field(default=120.0, ge=0.0)
-    self_rated_difficulty: float = Field(default=3.0, ge=1.0, le=5.0)
-    attempt_count:         int   = Field(default=15, ge=0)
-
-    # Optional: direct feature override (used when we have real analytics)
-    raw_features: Optional[Dict[str, float]] = Field(
-        default=None,
-        description="If provided, raw numeric features are used directly (bypasses encoding)"
-    )
-
-class SHAPValue(BaseModel):
-    feature:     str
-    description: str
-    raw_value:   float
-    shap_value:  float
-    direction:   str   # "up" or "down"
-    magnitude:   float
-
-class DifficultyResponse(BaseModel):
-    success:          bool
-    difficulty:       int          # 1-5
-    difficulty_label: str          # Easy / Medium / Hard / Expert
-    probability:      float        # confidence of predicted class
-    probabilities:    List[float]  # [p1, p2, p3, p4, p5]
-    shap_values:      List[SHAPValue]
-    model_used:       str          # "xgboost" or "rule_based"
-    top_driver:       str          # human-readable top SHAP factor
+

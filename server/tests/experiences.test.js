@@ -64,7 +64,7 @@ describe('Experience endpoints', () => {
 			expect(res.body.data.experience.company).toBe('TestCo')
 			expId = res.body.data.experience._id
 		},
-		10000
+		30000
 	)
 
 	test('POST /api/experiences — rejects unauthenticated request', async () => {

@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom'
-import { useBookmarks } from '../hooks/useBookmarks'
-import ExperienceCard from '../components/ui/ExperienceCard'
-import EmptyState from '../components/ui/EmptyState'
-import { PageSkeleton } from '../components/ui/LoadingSkeleton'
+import { useBookmarks } from '../hooks/appHooks'
+import { ExperienceCard } from '../components/FeatureComponents'
+import { EmptyState, PageSkeleton } from '../components/CommonUI'
 
 export default function Bookmarks() {
   const { bookmarks, total, isLoading, isError, removeBookmark, isRemoving } = useBookmarks()

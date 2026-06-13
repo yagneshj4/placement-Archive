@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../context/AuthContext.jsx'
 import { Flame, ArrowRight, Github, Chrome, Mail, Lock, User, School } from 'lucide-react'
 
 const fadeUp = {

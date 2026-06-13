@@ -5,15 +5,17 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_FILE = BASE_DIR / '.env'
+SERVER_ENV_FILE = BASE_DIR.parent / 'server' / '.env'
 
 # Manually load .env to ensure google_api_key is available
 load_dotenv(str(ENV_FILE))
+load_dotenv(str(SERVER_ENV_FILE))
 
 class Settings(BaseSettings):
     # Server
     app_name: str = "Placement Archive ML Service"
     debug: bool = False
-    port: int = 8001
+    port: int = 8000
 
     # Model
     embedding_model: str = "all-MiniLM-L6-v2"
@@ -32,7 +34,7 @@ class Settings(BaseSettings):
 
     # Gemini API
     google_api_key: str = ""
-    gemini_model: str = "gemini-1.5-flash"
+    gemini_model: str = "gemini-2.5-flash"
     gemini_max_tokens: int = 500
     gemini_temperature: float = 0.1
 

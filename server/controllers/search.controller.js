@@ -2,7 +2,7 @@ import axios from 'axios'
 import { Experience } from '../models/index.js'
 import { sendSuccess, sendError } from '../utils/apiResponse.js'
 
-const ML_URL = process.env.ML_SERVICE_URL || 'http://localhost:8001'
+const ML_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000'
 const ML_KEY = process.env.ML_SERVICE_API_KEY || 'ml-service-dev-key'
 
 const mlClient = axios.create({
@@ -183,35 +183,4 @@ export const semanticSearch = async (req, res, next) => {
   } catch (err) { next(err) }
 }
 
-// GET /api/search/keyword?q=arrays  — simple keyword fallback (no scoring)
-export const keywordSearch = async (req, res, next) => {
-  try {
-    const { q, page = 1, limit = 10 } = req.query
-    if (!q || !q.trim()) {
-      return sendError(res, 'Query parameter q is required', 400)
-    }
 
-    const regex = new RegExp(q.trim(), 'i')
-    const filter = {
-      $or: [
-        { narrative:       { $regex: regex } },
-        { preparationTips: { $regex: regex } },
-        { company:         { $regex: regex } },
-        { 'extractedTags.keywords': { $regex: regex } },
-      ],
-    }
-
-    const skip = (Number(page) - 1) * Number(limit)
-    const [experiences, total] = await Promise.all([
-      Experience.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit))
-        .populate('submittedBy', 'name college'),
-      Experience.countDocuments(filter),
-    ])
-
-    sendSuccess(res, {
-      experiences,
-      pagination: { total, page: Number(page), pages: Math.ceil(total / Number(limit)), limit: Number(limit) },
-    }, 'Keyword results fetched')
-
-  } catch (err) { next(err) }
-}

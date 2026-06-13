@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import axios from '../api/axios'
+import axios from '../api/apiClient.js'
 import ReactMarkdown from 'react-markdown'
-import PageWrapper from '../components/layout/PageWrapper'
+import { PageWrapper } from '../components/Layout'
 import { AlertCircle, Loader2, CheckCircle, Clock, Search } from 'lucide-react'
 
 const EXAMPLE_QUESTIONS = [

@@ -5,8 +5,8 @@ import {
   Settings, Save, Loader2, CheckCircle2, ShieldCheck, 
   MapPin, Bell, LogOut, ChevronRight, Activity
 } from 'lucide-react'
-import { useAuth } from '../hooks/useAuth'
-import { usersApi } from '../api/users'
+import { useAuth } from '../context/AuthContext.jsx'
+import { usersApi } from '../api/api.js'
 
 const ROLES = ['SDE', 'Data Engineer', 'ML Engineer', 'DevOps', 'Data Analyst', 'Product Manager', 'Other']
 const POPULAR_COMPANIES = [
@@ -24,8 +24,7 @@ export default function Profile() {
     name: '',
     graduationYear: '',
     targetRole: '',
-    targetCompanies: [],
-    emailDigest: true
+    targetCompanies: []
   })
 
   // Initialize form with user data
@@ -35,8 +34,7 @@ export default function Profile() {
         name: user.name || '',
         graduationYear: user.graduationYear || '',
         targetRole: user.targetRole || '',
-        targetCompanies: user.targetCompanies || [],
-        emailDigest: user.emailDigest !== false
+        targetCompanies: user.targetCompanies || []
       })
     }
   }, [user])
@@ -61,8 +59,7 @@ export default function Profile() {
       const payload = {
         name: formData.name,
         targetRole: formData.targetRole,
-        targetCompanies: formData.targetCompanies,
-        emailDigest: formData.emailDigest
+        targetCompanies: formData.targetCompanies
       }
 
       if (formData.graduationYear) {
@@ -262,21 +259,7 @@ export default function Profile() {
             </div>
 
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold">Email Digest</p>
-                  <p className="text-[10px] text-white/50 font-medium">Weekly preparation updates</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFormData({...formData, emailDigest: !formData.emailDigest})}
-                  className={`w-12 h-6 rounded-full transition-colors relative border border-white/10 ${formData.emailDigest ? 'bg-emerald-500' : 'bg-white/10'}`}
-                >
-                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${formData.emailDigest ? 'left-7' : 'left-1'}`} />
-                </button>
-              </div>
-              
-              <div className="pt-4 border-t border-white/10 flex items-center justify-between opacity-50 grayscale pointer-events-none">
+              <div className="flex items-center justify-between opacity-50 grayscale pointer-events-none">
                 <div>
                   <p className="text-sm font-bold">Public Profile</p>
                   <p className="text-[10px] text-white/50 font-medium">Visible to other students</p>

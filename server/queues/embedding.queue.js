@@ -20,10 +20,8 @@ try {
   })
   // Test connection
   embeddingQueue.on('error', (err) => {
-    if (err.message.includes('read-only')) {
-      console.warn('⚠️  Redis is read-only, switching to in-memory queue...')
-      embeddingQueue = createInMemoryQueue('embedding')
-    }
+    console.warn(`⚠️  Redis error (${err.message}), switching to in-memory queue...`)
+    embeddingQueue = createInMemoryQueue('embedding')
   })
 } catch (err) {
   console.warn(`⚠️  Redis connection failed (${err.message}), using in-memory queue`)

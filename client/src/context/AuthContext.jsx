@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
-import { authApi } from '../api/auth.js'
-import { setAccessToken } from '../api/axios.js'
+import { authApi } from '../api/api.js'
+import { setAccessToken } from '../api/apiClient.js'
 import { auth, googleProvider } from '../firebase.js'
 import { signInWithPopup } from 'firebase/auth'
 

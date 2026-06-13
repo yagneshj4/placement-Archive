@@ -42,16 +42,7 @@ describe('Search endpoints', () => {
 		expect(res.body.data.pagination.limit).toBe(10)
 	})
 
-	test('GET /api/search/keyword — returns regex results', async () => {
-		const res = await request(app).get('/api/search/keyword?q=DSA')
-		expect(res.status).toBe(200)
-		expect(Array.isArray(res.body.data.experiences)).toBe(true)
-	})
 
-	test('GET /api/search/keyword — returns 400 without q param', async () => {
-		const res = await request(app).get('/api/search/keyword')
-		expect(res.status).toBe(400)
-	})
 
 	test('GET /api/search — filter by roundType', async () => {
 		const res = await request(app).get('/api/search?roundType=technical')

@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useAuth } from './hooks/useAuth'
+import { useAuth } from './context/AuthContext.jsx'
 import Landing          from './pages/Landing'
 import Dashboard        from './pages/Dashboard'
 import GapDashboard     from './pages/GapDashboard'
@@ -10,11 +10,9 @@ import ExperienceDetail from './pages/ExperienceDetail'
 import Bookmarks        from './pages/Bookmarks'
 import QandA            from './pages/QandA'
 import AdminAnalytics   from './pages/AdminAnalytics'
-import Unsubscribed     from './pages/Unsubscribed'
 import Profile          from './pages/Profile'
 import NotFound         from './pages/NotFound'
-import ProtectedRoute   from './components/layout/ProtectedRoute'
-import PageWrapper      from './components/layout/PageWrapper'
+import { ProtectedRoute, PageWrapper } from './components/Layout'
 
 function App() {
   const { user, loading } = useAuth()
@@ -117,7 +115,7 @@ function App() {
           }
         />
 
-        <Route path="/unsubscribed" element={<PageWrapper><Unsubscribed /></PageWrapper>} />
+
 
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -23,8 +23,7 @@ from config.settings import settings
 from services.embedding import load_model
 from services.vector_store import init_chroma
 from services.tagger import load_taggers
-from services.difficulty import load_difficulty_model
-from routers import health, embed, search, autotag, rag, difficulty, sync
+from routers import health, embed, search, autotag, rag, sync
 
 # ── Logging setup ────────────────────────────────────────────────
 logging.basicConfig(
@@ -53,20 +52,12 @@ async def lifespan(app: FastAPI):
     logger.info("✅ ChromaDB ready")
 
     # Load auto-tagging classifiers (distilBERT models)
-    logger.info("Step 3/4: Loading auto-tagging classifiers...")
+    logger.info("Step 3/3: Loading auto-tagging classifiers...")
     taggers_loaded = load_taggers()
     if taggers_loaded:
         logger.info("✅ Auto-tagging classifiers ready")
     else:
         logger.warning("⚠️ Auto-tagging classifiers not loaded; /autotag will use rule-based fallback")
-
-    # Load XGBoost difficulty prediction model (optional)
-    logger.info("Step 4/4: Loading difficulty prediction model...")
-    try:
-        load_difficulty_model()
-        logger.info("✅ Difficulty model ready (XGBoost)")
-    except Exception as e:
-        logger.warning(f"⚠️ Difficulty model not loaded: {e} (will use rule-based fallback)")
 
     logger.info("=" * 50)
     logger.info(f"🚀 ML Service ready on port {settings.port}")
@@ -104,7 +95,6 @@ app.include_router(embed.router)
 app.include_router(search.router)
 app.include_router(autotag.router)
 app.include_router(rag.router)
-app.include_router(difficulty.router)
 app.include_router(sync.router)
 
 # ── Root endpoint ────────────────────────────────────────────────
@@ -119,7 +109,6 @@ async def root():
             "batch":  "POST /embed/batch",
             "search": "POST /search",
             "autotag": "POST /autotag",
-            "difficulty": "POST /difficulty",
             "rag": "POST /rag",
             "sync": "POST /sync",
             "docs":   "GET /docs",

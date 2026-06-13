@@ -58,6 +58,11 @@ const userSchema = new mongoose.Schema(
 			type: Boolean,
 			default: false,
 		},
+		provider: {
+			type: String,
+			enum: ['local', 'google'],
+			default: 'local',
+		},
 		contributionCount: {
 			type: Number,
 			default: 0,
@@ -65,10 +70,6 @@ const userSchema = new mongoose.Schema(
 		lastActive: {
 			type: Date,
 			default: Date.now,
-		},
-		emailDigest: {
-			type: Boolean,
-			default: true,
 		},
 	},
 	{

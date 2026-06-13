@@ -116,7 +116,10 @@ export const loginWithGoogle = async ({ idToken }) => {
 			passwordHash: 'GOOGLE_SSO_' + Math.random().toString(36).slice(-8),
 			college: 'VR Siddhartha Engineering College',
 			isVerified: true,
+			provider: 'google',
 		});
+	} else if (user.provider !== 'google') {
+		user.provider = 'google';
 	}
 
 	user.lastActive = new Date();

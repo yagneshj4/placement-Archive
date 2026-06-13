@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { experiencesApi } from '../api/experiences'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { authApi, aiApi, usersApi, experiencesApi } from '../api/api.js'
+import { useAuth } from '../context/AuthContext.jsx'
 
 // Debounce helper — waits ms milliseconds after last call before invoking fn
 function useDebounce(value, ms = 400) {
@@ -13,6 +14,112 @@ function useDebounce(value, ms = 400) {
   return debounced
 }
 
+// ── USE BOOKMARKS ────────────────────────────────────────────────────────────
+export function useBookmarks() {
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
+
+  // Fetch bookmarks — only when user is logged in
+  const {
+    data,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['bookmarks'],
+    queryFn: async () => {
+      const { data } = await authApi.getBookmarks()
+      return data.data
+    },
+    enabled: !!user,          // only fetch when logged in
+    staleTime: 1000 * 60 * 2, // fresh for 2 minutes
+  })
+
+  // Remove bookmark mutation with optimistic update
+  const removeMutation = useMutation({
+    mutationFn: (experienceId) => authApi.removeBookmark(experienceId),
+    onMutate: async (experienceId) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['bookmarks'] })
+
+      // Snapshot current data
+      const previous = queryClient.getQueryData(['bookmarks'])
+
+      // Optimistically remove from cache
+      queryClient.setQueryData(['bookmarks'], (old) => {
+        if (!old) return old
+        return {
+          ...old,
+          bookmarks: old.bookmarks.filter(b => b._id !== experienceId),
+          total: old.total - 1,
+        }
+      })
+
+      return { previous }
+    },
+    onError: (_err, _id, context) => {
+      // Rollback on error
+      queryClient.setQueryData(['bookmarks'], context.previous)
+    },
+    onSettled: () => {
+      // Always refetch after mutation to sync with server
+      queryClient.invalidateQueries({ queryKey: ['bookmarks'] })
+    },
+  })
+
+  return {
+    bookmarks: data?.bookmarks || [],
+    total:     data?.total     || 0,
+    isLoading,
+    isError,
+    removeBookmark: removeMutation.mutate,
+    isRemoving:     removeMutation.isPending,
+  }
+}
+
+
+
+// ── USE GAP ANALYSIS ─────────────────────────────────────────────────────────
+export function useGapAnalysis() {
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
+
+  const gapQuery = useQuery({
+    queryKey: ['gap-analysis', user?.id],
+    queryFn: async () => {
+      const { data } = await usersApi.getGapAnalysis()
+      return data.data
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5,
+  })
+
+  const profileMutation = useMutation({
+    mutationFn: (updates) => usersApi.updateProfile(updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['gap-analysis'] })
+      queryClient.invalidateQueries({ queryKey: ['bookmarks'] })
+    },
+  })
+
+  const data = gapQuery.data || {}
+
+  return {
+    gapData: data,
+    isLoading: gapQuery.isLoading,
+    isError: gapQuery.isError,
+    refetch: gapQuery.refetch,
+    updateProfile: profileMutation.mutate,
+    isSaving: profileMutation.isPending,
+    gaps: data.gaps || [],
+    radarData: data.radarData || [],
+    companyCoverage: data.companyCoverage || [],
+    readinessScore: data.readinessScore ?? 0,
+    targetCompanies: data.targetCompanies || [],
+    targetRole: data.targetRole || '',
+  }
+}
+
+// ── USE SEARCH ───────────────────────────────────────────────────────────────
 export function useSearch() {
   const [searchParams, setSearchParams] = useSearchParams()
 

@@ -2,7 +2,7 @@ import { motion, useInView, useAnimation, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Search, MessageSquare, Tag, BarChart, Target, Mail,
+  Search, MessageSquare, Tag, BarChart, Target,
   Zap, Users, Upload, Menu, X, Star, ArrowRight,
   ChevronRight, Flame, Github, Linkedin, Twitter
 } from 'lucide-react'
@@ -410,9 +410,7 @@ export default function Landing() {
               { icon: MessageSquare, color: "text-blue-600", bg: "bg-blue-50", title: "Ask Anything", text: "Natural language Q&A powered by LangChain + GPT-4o-mini. Every answer cited to a real student experience.", tag: "GPT-4o-mini + ChromaDB" },
               { icon: Search, color: "text-indigo-600", bg: "bg-indigo-50", title: "Semantic Search", text: "Find experiences by meaning using sentence-transformers. Searches 500+ experiences in under 200ms.", tag: "all-MiniLM-L6-v2" },
               { icon: Tag, color: "text-teal-600", bg: "bg-teal-50", title: "AI Auto-Tagging", text: "Every submission tagged by fine-tuned distilBERT in under 2 seconds. Topics, difficulty, round — automatic.", tag: "distilBERT" },
-              { icon: BarChart, color: "text-purple-600", bg: "bg-purple-50", title: "Difficulty Predictor", text: "XGBoost model trained on 200 samples predicts difficulty 1-5. SHAP values explain every prediction.", tag: "XGBoost + SHAP" },
               { icon: Target, color: "text-red-600", bg: "bg-red-50", title: "Gap Dashboard", text: "Set your target companies. See exactly which topics appear in their interviews vs what you have covered.", tag: "Personalised" },
-              { icon: Mail, color: "text-amber-600", bg: "bg-amber-50", title: "Weekly Digest", text: "Every Sunday 8am IST — personalised email with top questions for your target companies. Bull.js cron.", tag: "Bull.js + Nodemailer" },
             ].map((f, i) => (
               <motion.div
                 key={i} variants={fadeUpVariant} whileHover={{ y: -6, boxShadow: "0 20px 60px rgba(0,0,0,0.05)" }}
@@ -498,7 +496,7 @@ export default function Landing() {
                 placedAt: "Amazon"
               },
               {
-                text: "The SHAP difficulty tooltip is something I showed in my interview as my own side project. The panel was genuinely impressed.",
+                text: "The semantic search is incredibly fast. It helped me find specific programming patterns asked in recent round interviews.",
                 author: "Ananya Reddy",
                 college: "VRSEC 2024",
                 placedAt: "Microsoft"

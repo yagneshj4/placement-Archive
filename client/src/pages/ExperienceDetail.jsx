@@ -1,14 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { experiencesApi } from '../api/experiences'
-import { useAuth } from '../hooks/useAuth'
-import { useDifficulty } from '../hooks/useDifficulty'
-import DifficultyBadgeWithSHAP from '../components/ui/DifficultyBadgeWithSHAP'
-import TagChip from '../components/ui/TagChip'
-import ProcessingBanner from '../components/ui/ProcessingBanner'
-import SimilarExperiences from '../components/ui/SimilarExperiences'
-import { ExperienceCardSkeleton } from '../components/ui/LoadingSkeleton'
+import { experiencesApi } from '../api/api.js'
+import { useAuth } from '../context/AuthContext.jsx'
+import { DifficultyBadge, TagChip, ExperienceCardSkeleton } from '../components/CommonUI'
+import { ProcessingBanner, SimilarExperiences } from '../components/FeatureComponents'
 
 const ROUND_LABELS = {
   coding: 'Coding',
@@ -28,8 +24,7 @@ export default function ExperienceDetail() {
   const [bookmarked, setBookmarked] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  // ── Difficulty prediction ────────────────────────────────────
-  const { mutate: predictDifficulty, data: difficultyPrediction, isPending: isPredicting } = useDifficulty()
+
 
   // ── Fetch experience ─────────────────────────────────────────
   const { data, isLoading, isError } = useQuery({
@@ -43,20 +38,7 @@ export default function ExperienceDetail() {
     retry: 1,
   })
 
-  // ── Trigger difficulty prediction when experience loads ──────
-  useEffect(() => {
-    if (data?.company && data?.roundType && data?.extractedTags?.topics) {
-      predictDifficulty({
-        company: data.company,
-        round_type: data.roundType,
-        topics: data.extractedTags.topics || [],
-        skip_rate: 0.2,  // Default: 20% skip rate
-        avg_time_seconds: 150,  // Default: 2.5 min average
-        self_rated_difficulty: data.extractedTags?.difficulty || 3,
-        attempt_count: 20,  // Default: 20 attempts
-      })
-    }
-  }, [data])
+
 
   // ── Bookmark mutation ────────────────────────────────────────
   const bookmarkMutation = useMutation({
@@ -206,22 +188,12 @@ export default function ExperienceDetail() {
           </div>
 
           {/* Tags row */}
-          {(tags.length > 0 || difficultyPrediction) && (
+          {(tags.length > 0 || exp.extractedTags?.difficulty) && (
             <div className="flex flex-wrap items-center gap-2 mt-3">
-              {difficultyPrediction && (
-                <DifficultyBadgeWithSHAP
-                  difficulty={difficultyPrediction.difficulty}
-                  difficulty_label={difficultyPrediction.difficulty_label}
-                  probability={difficultyPrediction.probability}
-                  shap_values={difficultyPrediction.shap_values || []}
-                  model_used={difficultyPrediction.model_used}
-                  top_driver={difficultyPrediction.top_driver}
+              {exp.extractedTags?.difficulty && (
+                <DifficultyBadge
+                  difficulty={exp.extractedTags.difficulty}
                 />
-              )}
-              {isPredicting && !difficultyPrediction && (
-                <div className="px-2 py-1 text-xs text-gray-400 animate-pulse">
-                  Analyzing difficulty...
-                </div>
               )}
               {tags.map((tag, i) => (
                 <TagChip

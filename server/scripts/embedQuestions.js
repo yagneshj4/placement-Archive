@@ -1,11 +1,16 @@
 import dotenv from 'dotenv'
-dotenv.config({ path: '../.env' })
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+dotenv.config({ path: path.resolve(__dirname, '../.env') })
 
 import axios from 'axios'
 import { connectDB } from '../config/db.js'
 import { Question } from '../models/index.js'
 
-const ML_URL = process.env.ML_SERVICE_URL || 'http://localhost:8001'
+const ML_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000'
 const ML_KEY = process.env.ML_SERVICE_API_KEY || 'ml-service-dev-key'
 const mlClient = axios.create({
   baseURL: ML_URL,

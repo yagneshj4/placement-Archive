@@ -11,7 +11,7 @@ import { connectDB } from './config/db.js'
 import { connectRedis } from './config/redis.js'
 import routes from './routes/index.js'
 import { errorHandler } from './middleware/error.middleware.js'
-import { embeddingQueue, emailQueue, retrainingQueue } from './queues/index.js'
+import { embeddingQueue } from './queues/index.js'
 
 // Import workers — registers their process() handlers with Bull
 import './workers/index.js'
@@ -56,8 +56,6 @@ serverAdapter.setBasePath('/admin/queues')
 createBullBoard({
 	queues: [
 		new BullAdapter(embeddingQueue),
-		new BullAdapter(emailQueue),
-		new BullAdapter(retrainingQueue),
 	],
 	serverAdapter,
 })
@@ -72,8 +70,6 @@ app.get('/health', (req, res) => {
 		message: 'Placement Archive API running',
 		queues: {
 			embedding: 'active',
-			email: 'active',
-			retraining: 'active',
 		},
 	})
 })
@@ -86,16 +82,15 @@ app.use(errorHandler)
 
 // Start server after DB connects
 connectDB()
-	.then(async () => {
-		await connectRedis()
+	.then(() => {
+		// Connect Redis asynchronously (non-blocking)
+		connectRedis()
 
 		app.listen(PORT, () => {
 			console.log(`\n✅ Server running on http://localhost:${PORT}`)
 			console.log(`📊 Bull Board:  http://localhost:${PORT}/admin/queues`)
 			console.log(`🔥 Health:      http://localhost:${PORT}/health`)
 			console.log(`📡 Environment: ${process.env.NODE_ENV}\n`)
-
-
 		})
 	})
 	.catch((err) => {

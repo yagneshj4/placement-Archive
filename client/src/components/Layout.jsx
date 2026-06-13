@@ -1,8 +1,9 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../hooks/useAuth'
-import { useBookmarks } from '../../hooks/useBookmarks'
+import { Link, useLocation, useNavigate, Navigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext.jsx'
+import { useBookmarks } from '../hooks/appHooks.js'
 
-export default function Navbar() {
+// ── NAVBAR ───────────────────────────────────────────────────────────────────
+export function Navbar() {
   const { user, logout, isAdmin } = useAuth()
   const { total: bookmarkCount } = useBookmarks()
   const location = useLocation()
@@ -87,4 +88,46 @@ export default function Navbar() {
       </div>
     </nav>
   )
+}
+
+// ── PAGE WRAPPER ─────────────────────────────────────────────────────────────
+export function PageWrapper({ children }) {
+  return (
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col font-sans relative overflow-x-hidden">
+      {/* Universal Light Grid Background */}
+      <div 
+        className="fixed inset-0 z-0 pointer-events-none opacity-[0.03]"
+        style={{ backgroundImage: `linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)`, backgroundSize: '40px 40px' }}
+      />
+      <div className="relative z-10 flex flex-col flex-1">
+        <Navbar />
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
+      </div>
+    </div>
+  )
+}
+
+// ── PROTECTED ROUTE ──────────────────────────────────────────────────────────
+// Redirects to /auth if user is not logged in
+export function ProtectedRoute({ children, adminOnly = false }) {
+  const { user, loading, isAdmin } = useAuth()
+
+  // Show nothing while checking auth on mount
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-400 text-sm">Loading...</div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />
+  }
+
+  if (adminOnly && !isAdmin) {
+    return <Navigate to="/home" replace />
+  }
+
+  return children
 }

@@ -1,12 +1,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, CheckCircle2, ChevronDown, Activity, Settings2, Sparkles } from 'lucide-react'
-import { useGapAnalysis } from '../hooks/useGapAnalysis'
-import ReadinessScore from '../components/dashboard/ReadinessScore'
-import TopicRadar from '../components/dashboard/TopicRadar'
-import GapCard from '../components/dashboard/GapCard'
-import CompanyCoverage from '../components/dashboard/CompanyCoverage'
-import ProfileSetup from '../components/dashboard/ProfileSetup'
+import { useGapAnalysis } from '../hooks/appHooks'
+import { ReadinessScore, TopicRadar, GapCard, CompanyCoverage, ProfileSetup } from '../components/DashboardWidgets'
 
 export default function GapDashboard() {
   const {

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import {
 	BarChart,
 	Bar,
@@ -11,7 +11,7 @@ import {
 	CartesianGrid,
 	Cell,
 } from 'recharts'
-import { analyticsApi } from '../api/analytics'
+import { analyticsApi } from '../api/api.js'
 
 const COLORS = ['#3C3489', '#185FA5', '#0F6E56', '#854F0B', '#993C1D', '#534AB7', '#0B7285', '#8C3D99']
 
@@ -65,9 +65,7 @@ export default function AdminAnalytics() {
 		staleTime: 60_000,
 	})
 
-	const triggerDigest = useMutation({
-		mutationFn: () => analyticsApi.triggerDigest(),
-	})
+
 
 	const overview = overviewQuery.data
 	const companies = companyQuery.data?.companies || []
@@ -86,26 +84,10 @@ export default function AdminAnalytics() {
 					<span className="text-xs bg-red-100 text-red-700 px-2.5 py-1 rounded-full font-medium">
 						Admin only
 					</span>
-					<button
-						onClick={() => triggerDigest.mutate()}
-						disabled={triggerDigest.isPending}
-						className="px-3 py-1.5 bg-violet-700 text-white rounded-lg text-xs font-medium hover:bg-violet-800 disabled:opacity-60"
-					>
-						{triggerDigest.isPending ? 'Triggering...' : 'Trigger digest'}
-					</button>
 				</div>
 			</div>
 
-			{triggerDigest.isSuccess ? (
-				<div className="mb-4 bg-green-50 border border-green-200 rounded-xl p-3 text-sm text-green-700">
-					Digest dispatch queued successfully.
-				</div>
-			) : null}
-			{triggerDigest.isError ? (
-				<div className="mb-4 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">
-					Failed to trigger digest.
-				</div>
-			) : null}
+
 
 			{overview ? (
 				<Section title="Platform overview">

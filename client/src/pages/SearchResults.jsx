@@ -1,10 +1,6 @@
-import { useSearch } from '../hooks/useSearch'
-import SearchBar from '../components/ui/SearchBar'
-import FilterSidebar from '../components/ui/FilterSidebar'
-import ActiveFilters from '../components/ui/ActiveFilters'
-import SearchTypeBadge from '../components/ui/SearchTypeBadge'
-import ExperienceCard from '../components/ui/ExperienceCard'
-import { PageSkeleton } from '../components/ui/LoadingSkeleton'
+import { useSearch } from '../hooks/appHooks'
+import { SearchBar, FilterSidebar, ActiveFilters, ExperienceCard } from '../components/FeatureComponents'
+import { SearchTypeBadge, PageSkeleton } from '../components/CommonUI'
 
 const SORT_OPTIONS = [
   { value: 'relevance', label: 'Most relevant' },

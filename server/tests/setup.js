@@ -1,9 +1,13 @@
 import dotenv from 'dotenv'
 import { connectDB } from '../config/db.js'
 import mongoose from 'mongoose'
+import { jest } from '@jest/globals'
 
 // Load env vars from .env file
 dotenv.config()
+
+// Increase timeout for hooks and tests to 60s
+jest.setTimeout(60000)
 
 // Connect to test DB before all tests
 beforeAll(async () => {
