@@ -2,10 +2,11 @@ import mongoose from 'mongoose'
 
 export const connectDB = async () => {
 	try {
+		const dbName = process.env.NODE_ENV === 'test' ? 'placement_archive_test' : 'placement_archive'
 		const conn = await mongoose.connect(process.env.MONGODB_URI, {
-			dbName: 'placement_archive',
+			dbName,
 		})
-		console.log(`✅ MongoDB connected: ${conn.connection.host}`)
+		console.log(`✅ MongoDB connected: ${conn.connection.host} (db: ${dbName})`)
 	} catch (error) {
 		console.error('❌ MongoDB connection error:', error.message)
 		throw error
