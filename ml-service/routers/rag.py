@@ -94,17 +94,17 @@ async def answer_question(request: RAGRequest):
 async def rag_health():
     """Check if RAG pipeline is ready (has ChromaDB + optionally Gemini + Redis)."""
     try:
-        from services.rag import _try_init_gemini, _get_redis, _gemini_available
+        import services.rag as rag_service
         from services.vector_store import get_collection
 
         gemini_ready = False
         try:
-            _try_init_gemini()
-            gemini_ready = _gemini_available
+            rag_service._try_init_gemini()
+            gemini_ready = rag_service._gemini_available
         except Exception as e:
             logger.warning(f"Gemini not ready: {e}")
 
-        redis_ready = _get_redis() is not None
+        redis_ready = rag_service._get_redis() is not None
 
         collection = get_collection("experiences")
         chroma_ready = collection is not None and collection.count() > 0
