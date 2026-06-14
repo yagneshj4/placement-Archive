@@ -12,7 +12,7 @@ export const generalLimiter = rateLimit({
 // Strict limiter for AI endpoints (expensive LLM calls)
 export const aiRateLimiter = rateLimit({
 	windowMs: 1 * 60 * 1000,
-	max: 10,
+	max: process.env.NODE_ENV === 'development' ? 100 : 10,
 	message: { success: false, message: 'AI request limit reached. Wait 1 minute.' },
 	standardHeaders: true,
 	legacyHeaders: false,

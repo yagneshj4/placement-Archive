@@ -75,7 +75,7 @@ def _try_init_gemini():
         return _gemini_available
     
     _gemini_initialized = True
-    api_key = settings.google_api_key or os.environ.get("GOOGLE_API_KEY", "")
+    api_key = (settings.google_api_key or os.environ.get("GOOGLE_API_KEY", "")).strip()
     
     if not api_key or not _genai_available:
         logger.info("ℹ️ Gemini not available — using database-only mode (100% reliable)")

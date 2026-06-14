@@ -46,14 +46,23 @@ async def run_sync():
             # Create a rich text for embedding
             text = f"Company: {company}\nRole: {role}\nExperience: {narrative}"
             
-            ids.append(exp_id)
-            texts.append(text)
-            metadatas.append({
+            meta = {
                 "company": company,
                 "role": role,
-                "year": exp.get("year", 0),
+                "year": int(exp.get("year", 0)) if exp.get("year") else 0,
                 "roundType": exp.get("roundType", "Other")
-            })
+            }
+            if narrative:
+                meta["narrative_preview"] = narrative[:500]
+            tips = exp.get("preparationTips", "") or exp.get("tips", "")
+            if tips:
+                meta["tips_preview"] = tips[:200]
+            if exp.get("offerReceived") is not None:
+                meta["offerReceived"] = str(exp["offerReceived"])
+            
+            ids.append(exp_id)
+            texts.append(text)
+            metadatas.append(meta)
 
         # 4. Generate Embeddings
         logger.info(f"🔢 Generating embeddings for {len(texts)} items...")

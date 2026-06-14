@@ -41,6 +41,9 @@ async function embedAllExperiences() {
 			role:      exp.role      || '',
 			year:      exp.year      || 0,
 			roundType: exp.roundType || '',
+			narrative_preview: exp.narrative ? exp.narrative.substring(0, 500) : '',
+			tips_preview: (exp.preparationTips || exp.tips || '').substring(0, 200),
+			offerReceived: exp.offerReceived !== undefined ? String(exp.offerReceived) : '',
 		},
 	}))
 
