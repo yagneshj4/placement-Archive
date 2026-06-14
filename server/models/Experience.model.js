@@ -67,7 +67,6 @@ const experienceSchema = new mongoose.Schema(
 			modelUsed: { type: String, default: null },  // "full", "rules", "error"
 			processingTimeMs: { type: Number, default: null },
 			taggedAt: { type: Date, default: null },
-			autoTagged: { type: Boolean, default: false },
 		},
 		embeddingId: {
 			type: String,
@@ -128,16 +127,5 @@ experienceSchema.index(
 	{ narrative: 'text', preparationTips: 'text' },
 	{ weights: { narrative: 10, preparationTips: 5 }, name: 'experience_text_index' },
 )
-
-// Virtual: check if embedding is ready
-experienceSchema.virtual('isEmbedded').get(function () {
-	return this.embeddingStatus === 'done' && this.embeddingId !== null
-})
-
-// Increment view count
-experienceSchema.methods.incrementViews = function () {
-	this.views += 1
-	return this.save()
-}
 
 export default mongoose.model('Experience', experienceSchema)

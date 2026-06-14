@@ -189,14 +189,28 @@ export const getGapAnalysis = async (req, res, next) => {
 			resources: resourcesByTopic[gap.topic] || [],
 		}))
 
-		const companyCoverage = await Promise.all(
-			targetCompanies.map(async (company) => {
-				const count = await Experience.countDocuments({
-					company: { $regex: escapeRegex(company), $options: 'i' },
-				})
-				return { company, experienceCount: count }
-			}),
-		)
+		const coverageRaw = targetCompanies.length > 0
+			? await Experience.aggregate([
+				{ $match: companyFilter },
+				{
+					$group: {
+						_id: { $toLower: '$company' },
+						count: { $sum: 1 },
+					},
+				},
+			])
+			: []
+
+		const companyCoverage = targetCompanies.map((company) => {
+			const cleanedCompany = company.trim().toLowerCase()
+			let count = 0
+			coverageRaw.forEach((c) => {
+				if (c._id && c._id.includes(cleanedCompany)) {
+					count += c.count
+				}
+			})
+			return { company, experienceCount: count }
+		})
 
 		const radarData = companyTopics.slice(0, 8).map((ct) => {
 			const required = Math.round((totalTargetExps > 0 ? ct.count / totalTargetExps : 0) * 100)

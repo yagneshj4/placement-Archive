@@ -1,9 +1,9 @@
+import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
-import dotenv from 'dotenv'
 import { createBullBoard } from '@bull-board/api'
 import { BullAdapter } from '@bull-board/api/bullAdapter'
 import { ExpressAdapter } from '@bull-board/express'
@@ -12,17 +12,17 @@ import { connectRedis } from './config/redis.js'
 import routes from './routes/index.js'
 import { errorHandler } from './middleware/error.middleware.js'
 import { embeddingQueue } from './queues/index.js'
+import { protect, restrictTo } from './middleware/auth.middleware.js'
+import { generalLimiter } from './middleware/rateLimiter.middleware.js'
 
 // Import workers — registers their process() handlers with Bull
 import './workers/index.js'
 
-dotenv.config()
-
 const app = express()
 const PORT = process.env.PORT || 5000
 
-// Security and utility middleware
-app.use(helmet({ contentSecurityPolicy: false }))  // false for Bull Board UI
+// Security and utility middleware (CSP enabled globally)
+app.use(helmet())
 
 // CORS: Allow localhost on dev ports (5173, 5174, 5175, 3000)
 const allowedOrigins = [
@@ -60,8 +60,14 @@ createBullBoard({
 	serverAdapter,
 })
 
-// Mount Bull Board — accessible at /admin/queues
-app.use('/admin/queues', serverAdapter.getRouter())
+// Mount Bull Board — accessible at /admin/queues (restricted to admins, CSP disabled locally for UI layout)
+app.use(
+	'/admin/queues',
+	protect,
+	restrictTo('admin'),
+	helmet({ contentSecurityPolicy: false }),
+	serverAdapter.getRouter(),
+)
 
 // Health check
 app.get('/health', (req, res) => {
@@ -75,7 +81,7 @@ app.get('/health', (req, res) => {
 })
 
 // All API routes
-app.use('/api', routes)
+app.use('/api', generalLimiter, routes)
 
 // Global error handler (must be last)
 app.use(errorHandler)

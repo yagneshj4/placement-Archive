@@ -3,6 +3,9 @@ import { Experience } from '../models/index.js'
 import { sendSuccess, sendError } from '../utils/apiResponse.js'
 
 const ML_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000'
+if (process.env.NODE_ENV === 'production' && !process.env.ML_SERVICE_API_KEY) {
+  throw new Error('ML_SERVICE_API_KEY is required in production mode')
+}
 const ML_KEY = process.env.ML_SERVICE_API_KEY || 'ml-service-dev-key'
 
 const mlClient = axios.create({
@@ -57,7 +60,6 @@ export const semanticSearch = async (req, res, next) => {
 
       if (semanticDocIds.length > 0) {
         // Restrict to semantically similar documents
-        const { mongoose } = await import('mongoose')
         mongoFilter._id = { $in: semanticDocIds }
       } else {
         // Fallback: MongoDB text search

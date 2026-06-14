@@ -81,9 +81,12 @@ app = FastAPI(
 )
 
 # ── CORS — allow Node.js backend to call this service ───────────
+origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:5000,https://your-railway-domain.railway.app")
+allow_origins = [o.strip() for o in origins_str.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5000", "https://your-railway-domain.railway.app"],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],

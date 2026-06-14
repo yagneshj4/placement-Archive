@@ -55,12 +55,4 @@ export const createInMemoryQueue = (name) => {
   }
 }
 
-export const getJobStatus = (queueName, jobId) => {
-  return pendingJobs.find(j => j.id === jobId) || null
-}
-
-export const getPendingJobs = (queueName) => {
-  return pendingJobs.filter(j => j.state === 'pending')
-}
-
-export default { createInMemoryQueue, getJobStatus, getPendingJobs }
+export default { createInMemoryQueue }

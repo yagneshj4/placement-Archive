@@ -1,6 +1,10 @@
 import axios from '../api/axios.js'
 import { sendSuccess, sendError } from '../utils/apiResponse.js'
 
+if (process.env.NODE_ENV === 'production' && !process.env.ML_SERVICE_API_KEY) {
+	throw new Error('ML_SERVICE_API_KEY is required in production mode')
+}
+
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000'
 
 /**

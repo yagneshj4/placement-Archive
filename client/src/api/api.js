@@ -55,6 +55,9 @@ export const experiencesApi = {
   // PUT /api/experiences/:id/bookmark
   toggleBookmark: (id) => api.put(`/experiences/${id}/bookmark`),
 
+  // PUT /api/experiences/:id/upvote
+  toggleUpvote: (id) => api.put(`/experiences/${id}/upvote`),
+
   // GET /api/search — full-text + filter search
   search: (params = {}) => api.get('/search', { params }),
 }

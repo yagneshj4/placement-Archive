@@ -16,6 +16,12 @@ beforeAll(async () => {
 		throw new Error('MONGODB_URI not set in environment')
 	}
 	await connectDB()
+	// Import models to ensure they are registered in Mongoose
+	await import('../models/index.js')
+	// Wait for all indexes (including text indexes) to be built
+	await Promise.all(
+		mongoose.modelNames().map((modelName) => mongoose.model(modelName).ensureIndexes())
+	)
 })
 
 // Clean up after all tests

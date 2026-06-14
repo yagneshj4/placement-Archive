@@ -312,3 +312,32 @@ export const recoverFailedEmbeddings = async (req, res, next) => {
 		next(err)
 	}
 }
+
+// PUT /api/experiences/:id/upvote
+export const upvoteExperience = async (req, res, next) => {
+	try {
+		const exp = await Experience.findById(req.params.id)
+		if (!exp) throw new AppError('Experience not found', 404)
+
+		const alreadyUpvoted = exp.upvotedBy.some((id) => id.toString() === req.user.id)
+		if (alreadyUpvoted) {
+			exp.upvotedBy.pull(req.user.id)
+			exp.upvotes = Math.max(0, exp.upvotes - 1)
+		} else {
+			exp.upvotedBy.push(req.user.id)
+			exp.upvotes += 1
+		}
+		await exp.save({ validateBeforeSave: false })
+
+		sendSuccess(
+			res,
+			{
+				upvotes: exp.upvotes,
+				upvoted: !alreadyUpvoted,
+			},
+			alreadyUpvoted ? 'Upvote removed' : 'Upvoted successfully',
+		)
+	} catch (err) {
+		next(err)
+	}
+}

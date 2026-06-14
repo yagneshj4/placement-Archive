@@ -6,8 +6,7 @@ import { createInMemoryQueue } from './inMemoryQueue.js'
 let embeddingQueue
 
 try {
-  embeddingQueue = new Bull('embedding', {
-    redis: process.env.REDIS_URL,
+  embeddingQueue = new Bull('embedding', process.env.REDIS_URL, {
     defaultJobOptions: {
       attempts: 3,                    // retry failed jobs 3 times
       backoff: {

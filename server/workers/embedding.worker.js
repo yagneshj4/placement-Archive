@@ -3,6 +3,9 @@ import { Experience } from '../models/index.js'
 import axios from 'axios'
 
 const ML_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000'
+if (process.env.NODE_ENV === 'production' && !process.env.ML_SERVICE_API_KEY) {
+	throw new Error('ML_SERVICE_API_KEY is required in production mode')
+}
 const ML_KEY = process.env.ML_SERVICE_API_KEY || 'ml-service-dev-key'
 
 // Axios instance for ML service calls

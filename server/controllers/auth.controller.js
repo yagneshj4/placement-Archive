@@ -57,12 +57,8 @@ export const googleAuth = async (req, res, next) => {
 // POST /api/auth/refresh
 export const refreshToken = async (req, res, next) => {
 	try {
-		// Primary source: httpOnly cookie. Fallbacks are useful for manual testing tools.
-		const authHeader = req.headers.authorization
-		const bearerToken = authHeader && authHeader.startsWith('Bearer ')
-			? authHeader.split(' ')[1]
-			: null
-		const token = req.cookies?.refreshToken || bearerToken || req.body?.refreshToken
+		// Enforce httpOnly cookie (removed header/body fallbacks to prevent XSS leak paths)
+		const token = req.cookies?.refreshToken
 		const { accessToken, user } = await refreshAccessToken(token)
 
 		sendSuccess(res, { accessToken, user }, 'Token refreshed')
@@ -123,6 +119,9 @@ export const removeBookmark = async (req, res, next) => {
 	try {
 		const { User } = await import('../models/index.js')
 		const user = await User.findById(req.user.id)
+		if (!user) {
+			return sendError(res, 'User not found', 404)
+		}
 		user.bookmarks = user.bookmarks.filter(
 			b => b.toString() !== req.params.experienceId
 		)

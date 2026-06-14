@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import admin from 'firebase-admin'
+import { randomBytes } from 'crypto'
 import { User } from '../models/index.js'
 import { AppError } from '../middleware/error.middleware.js'
 
@@ -101,7 +102,7 @@ export const loginWithGoogle = async ({ idToken }) => {
 		throw new AppError('Invalid Google authentication token', 401);
 	}
 
-	const { email, name, picture } = decodedToken;
+	const { email, name } = decodedToken;
 
 	if (!email) {
 		throw new AppError('Google account has no email attached', 400);
@@ -113,7 +114,7 @@ export const loginWithGoogle = async ({ idToken }) => {
 		user = await User.create({
 			name: name || 'Google User',
 			email: email.toLowerCase().trim(),
-			passwordHash: 'GOOGLE_SSO_' + Math.random().toString(36).slice(-8),
+			passwordHash: randomBytes(32).toString('hex'),
 			college: 'VR Siddhartha Engineering College',
 			isVerified: true,
 			provider: 'google',
