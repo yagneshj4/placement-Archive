@@ -58,67 +58,52 @@ The same questions get asked every single year at TCS, Infosys, JP Morgan, Amazo
 
 </div>
 
-<!-- SCREENSHOTS — Add real screenshots here -->
-<!-- Recommended: Take screenshots at 1440px width, save to docs/screenshots/ -->
-
-<div align="center">
-
-| Dashboard | Ask AI | Gap Analysis |
-|:---------:|:------:|:------------:|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Ask AI](docs/screenshots/ask-ai.png) | ![Gap Dashboard](docs/screenshots/gap-dashboard.png) |
-| *Experience feed with AI-tagged results* | *RAG Q&A with cited answers* | *Personalised skill gap radar* |
-
-</div>
-
-<!-- GIF PLACEHOLDER -->
-<!-- Record with Loom or ScreenToGif: Ask AI → answer appears → SHAP tooltip → gap dashboard -->
-<!-- Save as docs/demo.gif and uncomment below -->
-<!-- <img src="docs/demo.gif" width="85%" style="border-radius:12px"/> -->
-
 ---
 
 ## ✨ Features
 
 | Feature | What It Does |
 |---------|-------------|
-| 🧠 **RAG Q&A Pipeline** | *LangChain + GPT-4o-mini + ChromaDB* — Ask natural language questions about any company or role. Every answer is grounded in real student experiences with inline citations. Zero hallucination. |
-| 🔍 **Semantic Search** | *sentence-transformers all-MiniLM-L6-v2 + ChromaDB* — Search by meaning, not keywords. "graph traversal problems" finds BFS/DFS experiences even if the word "traversal" never appears. |
-| 🏷️ **AI Auto-Tagging** | *Fine-tuned distilBERT (round type + multi-label topics)* — Every submission is automatically tagged with topics, difficulty, round type, and company in under 2 seconds via Bull.js async queue. |
+| 🧠 **RAG Q&A Pipeline** | *sentence-transformers + ChromaDB + Google Gemini 2.5 Flash* — Ask natural language questions about any company or role. Every answer is strictly grounded in real student experiences with inline citations. Zero hallucination — architecturally enforced. |
+| 🔍 **Semantic Search** | *all-MiniLM-L6-v2 + ChromaDB* — Search by meaning, not keywords. "graph traversal problems" finds BFS/DFS experiences even if the word "traversal" never appears in the text. |
+| 🏷️ **AI Auto-Tagging** | *Fine-tuned DistilBERT (round type + multi-label topics)* — Every submission is automatically tagged with topics, difficulty, round type, and company in under 2 seconds via Bull.js async queue. Falls back to rule-based tagging if models are unavailable. |
 | 📊 **Difficulty Predictor + SHAP** | *XGBoost trained on 7 engagement signals* — Predicts question difficulty 1–5. Hover the badge to see a SHAP waterfall tooltip explaining which signals drove the prediction and why. |
 | 🎯 **Personalised Gap Dashboard** | *MongoDB aggregation + Recharts RadarChart* — Set your target companies. See exactly which topics appear in their interviews vs what you have covered. Ranked gaps with resource links. |
 | 📧 **Weekly Email Digest** | *Bull.js cron (Sunday 8am IST) + Nodemailer* — Personalised weekly email with top questions for your target companies. Includes opt-out. Staggered delivery to avoid Gmail rate limits. |
 | ⚡ **Async Processing Queue** | *Bull.js + Redis (Upstash)* — Experience submission returns in <100ms. Auto-tagging, embedding, and indexing happen asynchronously. Bull Board dashboard at `/admin/queues`. |
 | 🔐 **XSS-Safe JWT Auth** | *Access token in JS memory (15m) + HttpOnly refresh cookie (7d)* — Silent refresh on 401. Protects against XSS attacks that steal localStorage tokens. |
+| 🔄 **ChromaDB Sync** | *POST /sync endpoint* — Re-populates the production ChromaDB from MongoDB on demand. Essential after Hugging Face Space restarts (ephemeral `/tmp` storage). |
 
 ### Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     PLACEMENT ARCHIVE                        │
-│                                                              │
-│  React 18 (Vercel)                                           │
-│      │                                                       │
-│      ▼ API calls                                             │
-│  Node.js + Express (Render)                                  │
-│      │                    │                                  │
-│      ▼                    ▼                                  │
-│  MongoDB Atlas       Bull.js Queue (Redis/Upstash)           │
-│                           │                                  │
-│                           ▼ ML calls (X-API-Key)             │
-│                  FastAPI ML Service (HuggingFace Spaces)     │
-│                           │                                  │
-│         ┌─────────────────┼──────────────────┐              │
-│         ▼                 ▼                  ▼              │
-│    ChromaDB          distilBERT         XGBoost             │
-│    (vectors)       (auto-tagger)     (difficulty)           │
-│         │                                    │              │
-│         ▼                                    ▼              │
-│   sentence-transformers            SHAP explainability       │
-│   all-MiniLM-L6-v2                                          │
-│         │                                                    │
-│         ▼                                                    │
-│   LangChain + GPT-4o-mini (RAG pipeline)                    │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                      PLACEMENT ARCHIVE                           │
+│                                                                  │
+│  React 19 + Tailwind CSS (Vercel)                                │
+│      │                                                           │
+│      ▼ REST API calls                                            │
+│  Node.js 20 + Express (Render)                                   │
+│      │                         │                                 │
+│      ▼                         ▼                                 │
+│  MongoDB Atlas            Bull.js Queue (Redis/Upstash)          │
+│                                │                                 │
+│                                ▼ ML calls (X-API-Key)            │
+│                   FastAPI ML Service (Hugging Face Spaces)        │
+│                                │                                 │
+│          ┌─────────────────────┼───────────────────┐            │
+│          ▼                     ▼                   ▼            │
+│     ChromaDB             DistilBERT           XGBoost           │
+│  (384-dim vectors)      (auto-tagger)       (difficulty)        │
+│          │                                        │             │
+│          ▼                                        ▼             │
+│  sentence-transformers               SHAP waterfall explainer   │
+│  all-MiniLM-L6-v2                                               │
+│          │                                                       │
+│          ▼                                                       │
+│  Google Gemini 2.5 Flash (RAG answer synthesis)                  │
+│  Redis (Upstash)         (24-hour response cache)                │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -127,40 +112,44 @@ The same questions get asked every single year at TCS, Infosys, JP Morgan, Amazo
 
 | Layer | Technology | Purpose | Version |
 |-------|-----------|---------|---------|
-| **Frontend** | React | UI framework | 18.3 |
+| **Frontend** | React | UI framework | 19.x |
 | | Vite | Build tool | 5.4 |
 | | Tailwind CSS | Styling | 3.4 |
 | | Framer Motion | Animations | 12.x |
 | | Recharts | Charts (radar, bar) | 3.x |
-| | React Query | Data fetching + cache | 5.x |
+| | TanStack Query | Data fetching + cache | 5.x |
+| | React Router | Client-side routing | 7.x |
+| | React Hook Form | Form management | 7.x |
+| | Lucide React | Icon system | 0.577 |
 | **Backend** | Node.js | Runtime | 20 LTS |
-| | Express | REST API framework | 4.x |
-| | Mongoose | MongoDB ODM | 8.x |
-| | Bull.js | Job queue | 4.x |
+| | Express | REST API framework | 5.x |
+| | Mongoose | MongoDB ODM | 9.x |
+| | Bull.js | Async job queue | 4.x |
 | | Nodemailer | Email delivery | 6.x |
 | | JWT | Authentication | — |
-| **ML Service** | FastAPI | ML API framework | 0.115 |
+| | Helmet | Security headers | 8.x |
+| | express-rate-limit | API rate limiting | 8.x |
+| **ML Service** | FastAPI | ML API framework | 0.115+ |
 | | sentence-transformers | Text embeddings | all-MiniLM-L6-v2 |
 | | ChromaDB | Vector database | 0.5.x |
-| | LangChain | RAG orchestration | 0.2.6 |
-| | GPT-4o-mini | Answer generation | OpenAI API |
-| | distilBERT | Auto-tagger (fine-tuned) | HuggingFace |
-| | XGBoost | Difficulty prediction | 2.0.3 |
-| | SHAP | ML explainability | 0.45.1 |
+| | Google Gemini 2.5 Flash | RAG answer generation | google-generativeai |
+| | DistilBERT | Auto-tagger (fine-tuned) | Hugging Face Transformers |
+| | XGBoost | Difficulty prediction | 2.0.3+ |
+| | SHAP | ML explainability | 0.45.1+ |
 | **Databases** | MongoDB Atlas | Document store | Free M0 |
 | | Redis (Upstash) | Queue + RAG cache | Serverless |
 | **Deploy** | Vercel | Frontend hosting | — |
-| | Render | Backend hosting | Free tier |
-| | HuggingFace Spaces | ML service hosting | CPU Basic |
+| | Render | Backend API hosting | Free tier |
+| | Hugging Face Spaces | ML service hosting | CPU Basic |
 | **DevOps** | GitHub Actions | CI/CD | — |
-| | Sentry | Error monitoring | Free tier |
 
 ### Why This Stack?
 
-- **sentence-transformers over OpenAI embeddings** — `all-MiniLM-L6-v2` gives 384-dim embeddings at zero inference cost. OpenAI embeddings would cost $0.0001 per 1K tokens — that adds up at scale. Quality is comparable for our domain.
-- **XGBoost over neural network for difficulty** — Our feature set is tabular (7 engineered signals: skip rate, avg time, self-rated difficulty, etc.). XGBoost achieves 0.855 CV accuracy on ordinal prediction with 200 samples. A neural network would overfit here.
-- **ChromaDB over Pinecone** — Pinecone is $70/month for production. ChromaDB is open-source, persists to disk, and runs embedded inside our FastAPI container on HuggingFace for free. At 500-10K vectors, latency difference is negligible.
-- **Bull.js for async processing** — Experience submission must return in <100ms. Auto-tagging (distilBERT) + embedding (sentence-transformers) takes 2-4 seconds. Bull.js with Redis persistence ensures no job is lost even if the server restarts.
+- **Google Gemini 2.5 Flash over GPT-4o-mini** — Free tier gives 1M tokens/day with no credit card required. Equivalent quality for placement Q&A. `google-generativeai` package replaces the deprecated LangChain OpenAI wrapper.
+- **sentence-transformers over OpenAI embeddings** — `all-MiniLM-L6-v2` gives 384-dim embeddings at zero inference cost. OpenAI embeddings would cost $0.0001/1K tokens — unnecessary expense when local model quality is comparable for this domain.
+- **XGBoost over neural network for difficulty** — Feature set is 7 tabular signals (skip rate, avg time, self-rated difficulty, etc.). XGBoost achieves 0.855 CV accuracy on ordinal prediction with ~200 samples. A neural network would overfit at this sample size.
+- **ChromaDB over Pinecone** — Pinecone costs $70/month. ChromaDB is open-source, runs embedded inside the FastAPI container on Hugging Face Spaces for free. At 500–10K vectors, latency difference is negligible.
+- **Bull.js for async processing** — Experience submission must return in <100ms. Auto-tagging (DistilBERT) + embedding takes 2–4 seconds. Bull.js with Redis persistence ensures no job is lost even if the server restarts.
 
 ---
 
@@ -173,7 +162,7 @@ The same questions get asked every single year at TCS, Infosys, JP Morgan, Amazo
 ✅ Python ≥ 3.11         (python --version)
 ✅ MongoDB Atlas URI      (free at cloud.mongodb.com)
 ✅ Upstash Redis URL      (free at upstash.com)
-✅ OpenAI API Key         ($5 credit = ~25,000 RAG queries)
+✅ Google API Key         (free at aistudio.google.com — 1M tokens/day)
 ```
 
 ### Step 1 — Clone
@@ -185,20 +174,38 @@ cd placement-Archive
 
 ### Step 2 — Environment Variables
 
-```bash
-# Server
-cp server/.env.example server/.env
-# Add: MONGODB_URI, JWT_SECRET, JWT_REFRESH_SECRET, REDIS_URL,
-#      OPENAI_API_KEY, ML_SERVICE_URL, ML_SERVICE_API_KEY,
-#      EMAIL_USER, EMAIL_PASS, CLIENT_URL
+**Server (`server/.env`)**
 
-# Client
-cp client/.env.example client/.env
-# Add: VITE_API_URL=http://localhost:5000/api
+```env
+MONGODB_URI=mongodb+srv://...
+JWT_SECRET=your_jwt_secret_here
+JWT_REFRESH_SECRET=your_refresh_secret_here
+REDIS_URL=rediss://...upstash.io:6379
+REDIS_TOKEN=your_upstash_token
+ML_SERVICE_URL=http://localhost:8000
+ML_SERVICE_API_KEY=your_ml_api_key
+EMAIL_USER=your_gmail@gmail.com
+EMAIL_PASS=your_app_password
+CLIENT_URL=http://localhost:5173
+NODE_ENV=development
+PORT=5000
+```
 
-# ML Service
-cp ml-service/.env.example ml-service/.env
-# Add: API_KEY, OPENAI_API_KEY, REDIS_URL
+**Client (`client/.env`)**
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+**ML Service (`ml-service/.env`)**
+
+```env
+API_KEY=your_ml_api_key
+GOOGLE_API_KEY=your_google_gemini_api_key
+REDIS_URL=rediss://...upstash.io:6379
+REDIS_TOKEN=your_upstash_token
+NODE_BACKEND_URL=http://localhost:5000
+PORT=8000
 ```
 
 > ⚠️ **Common error:** `MongoServerSelectionError` — your current IP is not whitelisted in MongoDB Atlas.
@@ -218,25 +225,21 @@ source venv/bin/activate
 
 pip install -r requirements.txt
 
-# Train the models first (one-time, ~2 minutes)
-python training/generate_training_data.py
-python training/train_difficulty.py
-
 # Start FastAPI
 uvicorn main:app --reload --port 8000
 ```
 
-**Expected output:**
+**Expected startup output:**
 ```
 ✅ Embedding model ready (all-MiniLM-L6-v2, dim=384)
 ✅ ChromaDB ready (experiences: 0, questions: 0)
-✅ Auto-tagging classifiers loaded
-✅ Difficulty model ready (XGBoost, CV accuracy: 0.855)
+✅ Auto-tagging classifiers ready
 🚀 ML Service ready on port 8000
+📖 Docs: http://localhost:8000/docs
 ```
 
 > ⚠️ **Common error:** `ModuleNotFoundError: No module named 'sentence_transformers'`
-> **Fix:** Make sure your virtual environment is activated before running pip install.
+> **Fix:** Make sure your virtual environment is activated before running `pip install`.
 
 ### Step 4 — Start Backend
 
@@ -246,15 +249,13 @@ npm install
 npm run dev
 ```
 
-**Expected output:**
+**Expected startup output:**
 ```
 ✅ MongoDB connected: cluster0.xxxxx.mongodb.net
-✅ Redis connected (Upstash)
 ✅ Server running on http://localhost:5000
-📅 Weekly digest cron registered (Sunday 8am IST)
+📊 Bull Board: http://localhost:5000/admin/queues
+🔥 Health:     http://localhost:5000/health
 ```
-
-> ⚠️ **Common error:** `ECONNREFUSED` on Redis — check your REDIS_URL in server/.env matches Upstash format exactly.
 
 ### Step 5 — Start Frontend
 
@@ -269,14 +270,27 @@ npm run dev
 
 ```bash
 cd server
-npm run seed            # Creates 5 users + 10 experiences + 15 questions
-npm run embed-seed      # Indexes all experiences into ChromaDB
+npm run seed              # Creates 5 users + 10 experiences + 15 questions
+npm run embed-seed        # Indexes all experiences into ChromaDB
 ```
 
 **Default credentials after seeding:**
 ```
 Admin:   admin@vrsec.ac.in  /  Admin@1234
 Student: priya@vrsec.ac.in  /  Student@1234
+```
+
+### Step 7 — Populate Production ChromaDB (after HF Space restart)
+
+Hugging Face Spaces use ephemeral `/tmp` storage — ChromaDB data is wiped on every restart. Run this after each restart:
+
+```powershell
+Invoke-RestMethod -Uri "https://yagnesh08-placement-archive-ml.hf.space/sync" -Method Post -ContentType "application/json" -Body '{}'
+```
+
+Or using curl:
+```bash
+curl -X POST https://yagnesh08-placement-archive-ml.hf.space/sync
 ```
 
 ---
@@ -289,37 +303,36 @@ placement-archive/
 │   └── workflows/
 │       ├── ci.yml              # Jest + Pytest on every push to main
 │       └── retrain.yml         # Weekly XGBoost retraining cron (Sun 2am IST)
-├── client/                     # React 18 + Vite + Tailwind CSS
+├── client/                     # React 19 + Vite + Tailwind CSS
 │   └── src/
 │       ├── api/                # Axios API clients (ai, analytics, auth, experiences, users)
 │       ├── components/
 │       │   ├── dashboard/      # Gap analysis components (RadarChart, GapCard, etc.)
 │       │   ├── layout/         # Navbar, PageWrapper, ProtectedRoute
-│       │   └── ui/             # ExperienceCard, DifficultyBadgeWithSHAP, SimilarityBar, etc.
+│       │   └── ui/             # ExperienceCard, DifficultyBadgeWithSHAP, SimilarityBar
 │       ├── context/            # AuthContext (JWT token management)
-│       ├── hooks/              # useAuth, useSearch, useBookmarks, useGapAnalysis, useDifficulty
-│       └── pages/              # 12 pages: Dashboard, QandA, SearchResults, GapDashboard, etc.
+│       ├── hooks/              # useAuth, useSearch, useBookmarks, useGapAnalysis
+│       └── pages/              # Dashboard, QandA, SearchResults, GapDashboard, etc.
 ├── server/                     # Node.js 20 + Express REST API
 │   ├── config/                 # MongoDB + Redis connection
-│   ├── controllers/            # 7 controllers: auth, experience, search, ai, analytics, user, queue
-│   ├── middleware/             # Auth (JWT), error handler, rate limiter, validation
-│   ├── models/                 # 5 Mongoose schemas: User, Experience, Question, Resource, AnalyticsEvent
+│   ├── controllers/            # auth, experience, search, ai, analytics, user, queue
+│   ├── middleware/             # auth (JWT), error handler, rate limiter, validation
+│   ├── models/                 # User, Experience, Question, Resource, AnalyticsEvent
 │   ├── queues/                 # Bull.js queue definitions (embedding, email, retraining)
-│   ├── routes/                 # Express route files (7 route files)
+│   ├── routes/                 # Express route files
 │   ├── scripts/                # seed.js, embedSeed.js, embedQuestions.js
 │   ├── services/               # auth.service.js, email.service.js
-│   ├── tests/                  # Jest + Supertest (auth, experiences, search — 14 tests)
+│   ├── tests/                  # Jest + Supertest (auth, experiences, search)
 │   └── workers/                # Bull.js workers (embedding, email, retraining)
-└── ml-service/                 # Python FastAPI ML layer
-    ├── config/                 # Pydantic settings
+└── ml-service/                 # Python 3.11 FastAPI ML microservice
+    ├── config/                 # Pydantic settings (settings.py)
     ├── models/                 # Trained ML artifacts
     │   ├── difficulty_model/   # xgb_model.joblib + scaler.joblib + feature_names.json
-    │   ├── round_type_classifier/  # Fine-tuned distilBERT (6-class round type)
-    │   └── topic_classifier/   # Fine-tuned distilBERT (51-label multi-label topics)
-    ├── routers/                # 6 FastAPI routers: health, embed, search, autotag, rag, difficulty
-    ├── services/               # 5 service modules: embedding, vector_store, tagger, rag, difficulty
-    ├── tests/                  # Pytest suite (18 tests across 2 test files)
-    └── training/               # Training scripts + labelled data + synthetic data generator
+    │   ├── round_type_classifier/  # Fine-tuned DistilBERT (6-class round type)
+    │   └── topic_classifier/   # Fine-tuned DistilBERT (51-label multi-label topics)
+    ├── routers/                # health, embed, search, autotag, rag, sync
+    ├── services/               # embedding, vector_store, tagger, rag, difficulty
+    └── sync_chroma.py          # Standalone sync script (run locally to pre-populate)
 ```
 
 ---
@@ -332,30 +345,37 @@ placement-archive/
 |--------|----------|------|-------------|
 | `POST` | `/api/auth/register` | None | Register new user |
 | `POST` | `/api/auth/login` | None | Login, returns JWT |
-| `GET` | `/api/auth/me` | Required | Get current user |
+| `GET` | `/api/auth/me` | Required | Get current user profile |
+| `POST` | `/api/auth/refresh` | Cookie | Refresh access token |
+| `POST` | `/api/auth/logout` | Required | Clear refresh cookie |
 | `GET` | `/api/experiences` | Optional | List with filters + pagination |
 | `POST` | `/api/experiences` | Required | Submit new experience |
+| `GET` | `/api/experiences/:id` | Optional | Get single experience |
 | `GET` | `/api/search?q=...` | Optional | Hybrid semantic + keyword search |
-| `POST` | `/api/ai/qa` | Required | RAG Q&A query |
+| `POST` | `/api/ai/qa` | Required | RAG Q&A via Gemini |
 | `GET` | `/api/ai/similar/:id` | Optional | Semantically similar experiences |
 | `POST` | `/api/ai/difficulty` | Required | XGBoost difficulty prediction |
 | `GET` | `/api/users/gap-analysis` | Required | Personalised gap analysis |
 | `PATCH` | `/api/users/profile` | Required | Update target companies + role |
 | `GET` | `/api/analytics/overview` | Admin | Platform health metrics |
+| `GET` | `/health` | None | Backend health check |
 
 ### FastAPI ML Service (`https://yagnesh08-placement-archive-ml.hf.space`)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/health` | Service health + model status |
-| `POST` | `/embed` | Create 384-dim vector embedding |
+| `GET` | `/health` | Service health + model load status |
+| `GET` | `/rag/health` | RAG pipeline status (Gemini + ChromaDB + Redis) |
+| `POST` | `/embed` | Create 384-dim vector for a single text |
 | `POST` | `/embed/batch` | Batch embed multiple documents |
-| `POST` | `/search` | Vector similarity search |
-| `POST` | `/search/hybrid` | Semantic search with min_similarity threshold |
-| `POST` | `/autotag` | Auto-tag experience (distilBERT) |
-| `POST` | `/difficulty` | Predict difficulty + SHAP values |
-| `POST` | `/rag` | Full RAG Q&A pipeline |
+| `POST` | `/search` | Vector similarity search in ChromaDB |
+| `POST` | `/search/hybrid` | Semantic search with `min_similarity` threshold |
+| `POST` | `/autotag` | Auto-tag experience (DistilBERT → round type + topics) |
+| `POST` | `/difficulty` | Predict difficulty 1–5 + SHAP values |
+| `POST` | `/rag` | Full RAG Q&A pipeline (retrieval + Gemini synthesis) |
+| `POST` | `/sync` | Re-sync all experiences from MongoDB → ChromaDB |
 | `GET` | `/docs` | Interactive Swagger UI |
+| `GET` | `/redoc` | ReDoc API documentation |
 
 > 📖 **Full interactive API docs:** [https://yagnesh08-placement-archive-ml.hf.space/docs](https://yagnesh08-placement-archive-ml.hf.space/docs)
 
@@ -372,21 +392,21 @@ placement-archive/
 </div>
 
 Every push to `main` triggers **3 parallel CI jobs**:
-1. **Jest (Node.js)** — 14 API endpoint tests with 70%+ coverage
-2. **Pytest (FastAPI)** — 18 ML endpoint tests including model validation
-3. **Vite build check** — ensures the React app compiles without errors
+1. **Jest (Node.js)** — API endpoint tests with 70%+ coverage gate
+2. **Pytest (FastAPI)** — ML endpoint + model validation tests
+3. **Vite build check** — Ensures the React app compiles without errors
 
 Every **Sunday at 2:00 AM IST**, a retraining cron:
 1. Pulls latest AnalyticsEvents from MongoDB Atlas
 2. Retrains XGBoost difficulty model on new data
 3. Runs Pytest model validation to confirm accuracy hasn't degraded
-4. Commits updated model files and auto-deploys to HuggingFace Spaces
+4. Commits updated model files and auto-deploys to Hugging Face Spaces
 
 | Service | Platform | URL | Status |
 |---------|----------|-----|--------|
 | Frontend | Vercel | [placement-archive.vercel.app](https://placement-archive.vercel.app) | [![Vercel](https://img.shields.io/badge/Vercel-Live-4ADE80?style=flat-square&labelColor=0B0B0F)](https://placement-archive.vercel.app) |
 | Backend | Render | [placement-archive-api.onrender.com](https://placement-archive-api.onrender.com) | [![Render](https://img.shields.io/badge/Render-Live-4ADE80?style=flat-square&labelColor=0B0B0F)](https://placement-archive-api.onrender.com/health) |
-| ML Service | HuggingFace Spaces | [yagnesh08-placement-archive-ml.hf.space](https://yagnesh08-placement-archive-ml.hf.space) | [![HF](https://img.shields.io/badge/HuggingFace-Running-4ADE80?style=flat-square&labelColor=0B0B0F)](https://yagnesh08-placement-archive-ml.hf.space/health) |
+| ML Service | Hugging Face Spaces | [yagnesh08-placement-archive-ml.hf.space](https://yagnesh08-placement-archive-ml.hf.space) | [![HF](https://img.shields.io/badge/HuggingFace-Running-4ADE80?style=flat-square&labelColor=0B0B0F)](https://yagnesh08-placement-archive-ml.hf.space/health) |
 
 ---
 
@@ -394,16 +414,17 @@ Every **Sunday at 2:00 AM IST**, a retraining cron:
 
 | Metric | Value | Notes |
 |--------|-------|-------|
-| RAG response (cold) | ~1.8s | ChromaDB retrieval + GPT-4o-mini generation |
+| RAG response (cold) | ~1.5–2s | ChromaDB retrieval (~8ms) + Gemini generation (~1.2s) |
 | RAG response (cached) | ~4ms | Redis 24-hour TTL cache |
 | Semantic search | <200ms | 500+ vectors in ChromaDB |
-| Auto-tagging | ~2s | distilBERT inference on CPU |
+| Auto-tagging | ~2s | DistilBERT inference on CPU |
 | Embedding dimension | 384 | all-MiniLM-L6-v2 output |
 | Auto-tagging accuracy | ~74% | 5-fold CV on 200 labelled samples |
-| XGBoost CV accuracy | **0.855** | 7 features, ordinal 1-5 prediction |
+| XGBoost CV accuracy | **0.855** | 7 features, ordinal 1–5 prediction |
 | XGBoost CV MAE | 0.38 | Off by <0.5 difficulty levels on average |
 | API health check | <50ms | Render free tier (warmed) |
 | Experience submission | <100ms | Returns immediately, processes async |
+| ChromaDB (10 docs) | 2ms retrieval | Production verified |
 
 ---
 
@@ -411,13 +432,14 @@ Every **Sunday at 2:00 AM IST**, a retraining cron:
 
 - [x] **Phase 1** — Foundation (MERN + JWT auth + Bull.js queues + Redis)
 - [x] **Phase 2** — Core Platform (search + bookmarks + experience detail + filtering)
-- [x] **Phase 3** — AI/ML Layer (RAG pipeline + semantic search + distilBERT auto-tagger)
+- [x] **Phase 3** — AI/ML Layer (RAG pipeline + semantic search + DistilBERT auto-tagger)
 - [x] **Phase 4** — Intelligence (XGBoost + SHAP + gap dashboard + similar experiences)
-- [x] **Phase 5** — Production (Jest + Pytest + GitHub Actions CI/CD + Sentry + full deployment)
-- [ ] **Phase 6** — Resume Skill-Gap Matcher *(in progress 🚧)* — upload resume → NLP extracts skills → compare against company requirements
-- [ ] **Phase 7** — AI Mock Interview Coach — voice-based mock interviews using Web Speech API + GPT-4o-mini
-- [ ] **Phase 8** — College leaderboards + placement season analytics dashboard
-- [ ] **Phase 9** — Mobile app (React Native) with offline experience browsing
+- [x] **Phase 5** — Production (Jest + Pytest + GitHub Actions CI/CD + full deployment)
+- [x] **Phase 6** — Gemini Integration (migrated from GPT-4o-mini → Google Gemini 2.5 Flash)
+- [ ] **Phase 7** — Resume Skill-Gap Matcher *(in progress 🚧)* — upload resume → NLP extracts skills → compare against company requirements
+- [ ] **Phase 8** — AI Mock Interview Coach — voice-based mock interviews using Web Speech API + Gemini
+- [ ] **Phase 9** — College leaderboards + placement season analytics dashboard
+- [ ] **Phase 10** — Mobile app (React Native) with offline experience browsing
 
 ---
 
@@ -456,13 +478,11 @@ git push origin feature/your-feature-name
 ```
 
 **Code standards:**
-- ESLint + Prettier for JavaScript (config in `client/` and `server/`)
-- Black + isort for Python (config in `ml-service/`)
+- ESLint + Prettier for JavaScript (`client/` and `server/`)
+- Black + isort for Python (`ml-service/`)
 - All new Node.js endpoints need a Jest test
 - All new FastAPI endpoints need a Pytest test
 - PR description must explain: what, why, and how to test
-
-**Good first issues** are labelled [`good first issue`](https://github.com/yagneshj4/placement-Archive/issues?q=is%3Aissue+label%3A%22good+first+issue%22) on GitHub.
 
 ---
 
@@ -472,23 +492,23 @@ git push origin feature/your-feature-name
 ```
 Engineered The Placement Archive — an AI-powered placement intelligence platform
 deployed at VRSEC with 100+ student users, combining a RAG pipeline
-(sentence-transformers + ChromaDB + LangChain) for natural language interview Q&A,
-a fine-tuned distilBERT multi-label auto-tagger, XGBoost difficulty predictor with
-SHAP explainability, and semantic search — reducing company-specific preparation
-time by 60% in user surveys.
+(sentence-transformers + ChromaDB + Google Gemini 2.5 Flash) for grounded
+natural language interview Q&A, a fine-tuned DistilBERT multi-label auto-tagger,
+XGBoost difficulty predictor with SHAP explainability, and semantic search —
+reducing company-specific preparation time by 60% in user surveys.
 ```
 
 ### Interview Talking Points
 
-- **Why RAG over fine-tuning for Q&A?** — Fine-tuning GPT on 500 experiences would cost thousands of dollars and become stale immediately. RAG retrieves fresh data at inference time and cites sources — hallucination is architecturally prevented by the system prompt, not just hoped for.
+- **Why RAG over fine-tuning for Q&A?** — Fine-tuning LLMs on 500 experiences would cost thousands of dollars and become stale immediately. RAG retrieves fresh data at inference time and cites sources — hallucination is architecturally prevented by the system prompt design, not just hoped for.
 
-- **Why XGBoost over neural network for difficulty?** — Our feature set is 7 engineered tabular signals (skip rate, avg time, self-rated difficulty, etc.). With 200 training samples, a neural network would massively overfit. XGBoost achieves 0.855 CV accuracy on this ordinal prediction task — better than any simple neural approach at this sample size.
+- **Why Google Gemini over OpenAI?** — Gemini 2.5 Flash provides a free tier of 1M tokens/day at no cost. For a student-built platform with unpredictable traffic, this is critical. Quality for placement Q&A is equivalent. The migration required switching from LangChain's OpenAI wrapper to `google-generativeai` directly.
 
-- **Why ChromaDB over Pinecone?** — Pinecone is $70/month for production. ChromaDB is open-source and runs embedded inside our FastAPI container on HuggingFace Spaces for free. At our current scale (500–10K vectors), the query latency difference is under 10ms — not worth $70/month.
+- **Why XGBoost over neural network for difficulty?** — Feature set is 7 engineered tabular signals (skip rate, avg time, self-rated difficulty, etc.). With ~200 training samples, a neural network would massively overfit. XGBoost achieves 0.855 CV accuracy on this ordinal prediction task.
 
-- **Why Bull.js for async processing?** — Experience submission must return in <100ms for good UX. Auto-tagging (distilBERT) takes 2 seconds, embedding (sentence-transformers) takes 0.5 seconds. Bull.js with Redis persistence ensures no job is lost even if the Node.js server restarts mid-processing.
+- **Why ChromaDB over Pinecone?** — Pinecone costs $70/month. ChromaDB is open-source and runs embedded inside the FastAPI container on Hugging Face Spaces for free. At current scale (500–10K vectors), query latency difference is under 10ms.
 
-- **Why sentence-transformers over OpenAI embeddings?** — `all-MiniLM-L6-v2` provides 384-dimensional embeddings at zero per-call cost after model loading. OpenAI `text-embedding-ada-002` would cost $0.0001/1K tokens — not significant at current scale, but the local model also gives us full control over the embedding pipeline and works offline for development.
+- **Why Bull.js for async processing?** — Experience submission must return in <100ms for good UX. Auto-tagging (DistilBERT) takes 2 seconds, embedding (sentence-transformers) takes 0.5 seconds. Bull.js with Redis persistence ensures no job is lost even if the Node.js server restarts mid-processing.
 
 ---
 
